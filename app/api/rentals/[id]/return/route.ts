@@ -1,18 +1,25 @@
+import { rentalIdSchema } from "@/lib/api/schemas";
+import { logRentalReturn } from "@/lib/api/activity";
+import { parseValue } from "@/lib/api/validate";
 import { returnRental } from "@/lib/db/repository";
 import { NextResponse } from "next/server";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
 export async function POST(_request: Request, context: RouteContext) {
+  const { id: rawId } = await context.params;
+  const parsed = parseValue(rawId, rentalIdSchema);
+  if ("error" in parsed) return parsed.error;
+
   try {
-    const { id } = await context.params;
     const returnDate = new Date().toISOString().slice(0, 10);
-    const rental = await returnRental(id, returnDate);
+    const rental = await returnRental(parsed.data, returnDate);
 
     if (!rental) {
       return NextResponse.json({ error: "Rental not found" }, { status: 404 });
     }
 
+    await logRentalReturn(rental);
     return NextResponse.json(rental);
   } catch (err) {
     console.error("POST /api/rentals/[id]/return", err);

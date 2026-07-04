@@ -1,0 +1,112 @@
+"use client";
+
+import { useState } from "react";
+import { InvFlagSelect } from "@/components/rental/inv-flag-select";
+import { InvNumInput } from "@/components/rental/inv-num-input";
+import { CATS } from "@/lib/rental/constants";
+import {
+  flagModeToItemFlags,
+  type InvFlagMode,
+} from "@/lib/rental/inv-flags";
+import type { Category, InventoryItem } from "@/lib/rental/types";
+
+export type NewInventoryInput = Omit<InventoryItem, "id">;
+
+const emptyItem = (): NewInventoryInput => ({
+  name: "",
+  cat: "ГЭРЭЛ",
+  qty: 1,
+  price: 0,
+});
+
+type InventoryAddFormProps = {
+  busy: boolean;
+  onAdd: (item: NewInventoryInput) => Promise<void>;
+  onCancel: () => void;
+};
+
+export function InventoryAddForm({ busy, onAdd, onCancel }: InventoryAddFormProps) {
+  const [draft, setDraft] = useState<NewInventoryInput>(emptyItem);
+  const [flagMode, setFlagMode] = useState<InvFlagMode>("");
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!draft.name.trim()) {
+      alert("Барааны нэрийг оруулна уу.");
+      return;
+    }
+    await onAdd({
+      ...draft,
+      name: draft.name.trim(),
+      ...flagModeToItemFlags(flagMode),
+    });
+    setDraft(emptyItem());
+    setFlagMode("");
+  }
+
+  return (
+    <form className="inv-add-form" onSubmit={(e) => void handleSubmit(e)}>
+      <div className="inv-add-form__grid">
+        <label className="inv-add-form__field inv-add-form__field--name">
+          <span>Нэр</span>
+          <input
+            type="text"
+            value={draft.name}
+            placeholder="Жишээ: Amaran Ray 660C"
+            onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
+            autoFocus
+          />
+        </label>
+        <label className="inv-add-form__field">
+          <span>Төрөл</span>
+          <select
+            value={draft.cat}
+            onChange={(e) =>
+              setDraft((d) => ({ ...d, cat: e.target.value as Category }))
+            }
+          >
+            {CATS.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="inv-add-form__field">
+          <span>Нийт</span>
+          <InvNumInput
+            min={0}
+            value={draft.qty}
+            onChange={(qty) => setDraft((d) => ({ ...d, qty }))}
+          />
+        </label>
+        <label className="inv-add-form__field">
+          <span>Үнэ (12ц)</span>
+          <InvNumInput
+            min={0}
+            value={draft.price}
+            onChange={(price) => setDraft((d) => ({ ...d, price }))}
+          />
+        </label>
+        <label className="inv-add-form__field">
+          <span>Тэмдэглэл</span>
+          <InvFlagSelect value={flagMode} onChange={setFlagMode} />
+        </label>
+      </div>
+
+      <div className="inv-add-form__actions">
+        <button type="submit" className="btn sm" disabled={busy}>
+          {busy ? "Хадгалж байна…" : "Нэмэх"}
+        </button>
+        <button
+          type="button"
+          className="btn sm ghost"
+          disabled={busy}
+          onClick={onCancel}
+        >
+          Болих
+        </button>
+      </div>
+    </form>
+  );
+}

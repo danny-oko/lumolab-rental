@@ -1,5 +1,7 @@
+import { createRentalSchema } from "@/lib/api/schemas";
+import { logRentalCheckout } from "@/lib/api/activity";
+import { parseJsonBody } from "@/lib/api/validate";
 import { createRental, listRentals } from "@/lib/db/repository";
-import type { RentalRecord } from "@/lib/rental/types";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -16,9 +18,12 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const parsed = await parseJsonBody(request, createRentalSchema);
+  if ("error" in parsed) return parsed.error;
+
   try {
-    const rental = (await request.json()) as RentalRecord;
-    const created = await createRental(rental);
+    const created = await createRental(parsed.data);
+    await logRentalCheckout(created);
     return NextResponse.json(created, { status: 201 });
   } catch (err) {
     console.error("POST /api/rentals", err);

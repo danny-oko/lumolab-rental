@@ -218,12 +218,6 @@ export function OrderCart({
             value={cust.addr}
             onChange={(e) => onCustChange({ ...cust, addr: e.target.value })}
           />
-          <input
-            type="number"
-            placeholder="Барьцаа (deposit)"
-            value={cust.deposit}
-            onChange={(e) => onCustChange({ ...cust, deposit: e.target.value })}
-          />
         </div>
         <button type="button" className="btn block" onClick={onCheckout}>
           Төлбөр баталгаажуулж гэрээ үүсгэх

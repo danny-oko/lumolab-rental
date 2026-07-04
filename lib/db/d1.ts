@@ -33,9 +33,11 @@ function getD1Config() {
   return { accountId, databaseId, token };
 }
 
-async function d1Request(
-  body: { sql: string; params?: unknown[] } | { sql: string; params?: unknown[] }[],
-): Promise<D1QueryResult[]> {
+type D1Statement = { sql: string; params?: unknown[] };
+
+type D1RequestBody = D1Statement | { batch: D1Statement[] };
+
+async function d1Request(body: D1RequestBody): Promise<D1QueryResult[]> {
   const { accountId, databaseId, token } = getD1Config();
 
   const res = await fetch(
@@ -89,8 +91,6 @@ export async function d1Run(
   return result.meta;
 }
 
-export async function d1Batch(
-  statements: { sql: string; params?: unknown[] }[],
-): Promise<D1QueryResult[]> {
-  return d1Request(statements);
+export async function d1Batch(statements: D1Statement[]): Promise<D1QueryResult[]> {
+  return d1Request({ batch: statements });
 }

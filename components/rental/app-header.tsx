@@ -1,4 +1,3 @@
-import { LumoMark } from "@/components/rental/icons";
 import type { Theme } from "@/lib/rental/types";
 
 type AppHeaderProps = {
@@ -10,7 +9,12 @@ export function AppHeader({ theme, onToggleTheme }: AppHeaderProps) {
   return (
     <header>
       <div className="logo">
-        <LumoMark size={24} />
+        <img
+          src={theme === "light" ? "/logo-red.jpeg" : "/logo-white.jpeg"}
+          alt="Lumo Lab"
+          width={38}
+          height={38}
+        />
       </div>
       <div className="header-text">
         <h1>Lumo Lab — Түрээсийн систем</h1>

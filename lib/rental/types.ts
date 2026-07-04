@@ -60,3 +60,17 @@ export interface RentalRecord {
 export type TabId = "inv" | "rent" | "active";
 export type PriceMode = "base" | "vat";
 export type Theme = "dark" | "light";
+
+export type ActivityLogKind = "inventory" | "rental";
+
+export interface ActivityLogEntry {
+  id: number;
+  createdAt: string;
+  kind: ActivityLogKind;
+  action: string;
+  entityId: string;
+  summary: string;
+  detail?: string;
+}
+
+export type RentalHistoryFilter = "all" | "out" | "in";

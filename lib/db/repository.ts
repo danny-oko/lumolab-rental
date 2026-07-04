@@ -9,6 +9,18 @@ import {
 } from "@/lib/db/mappers";
 import type { InventoryItem, RentalRecord } from "@/lib/rental/types";
 
+export type NewInventoryItem = Omit<InventoryItem, "id">;
+
+export class InventoryInUseError extends Error {
+  activeQty: number;
+
+  constructor(activeQty: number) {
+    super("Item is on an active rental");
+    this.name = "InventoryInUseError";
+    this.activeQty = activeQty;
+  }
+}
+
 export async function listInventory(): Promise<InventoryItem[]> {
   const rows = await d1All<InventoryRow>(
     "SELECT * FROM inventory ORDER BY id ASC",
@@ -19,7 +31,7 @@ export async function listInventory(): Promise<InventoryItem[]> {
 export async function updateInventoryItem(
   id: number,
   field: keyof InventoryItem,
-  value: string | number,
+  value: string | number | boolean,
 ): Promise<InventoryItem | null> {
   const columnMap: Partial<Record<keyof InventoryItem, string>> = {
     name: "name",
@@ -51,6 +63,78 @@ export async function updateInventoryItem(
     [id],
   );
   return row[0] ? rowToInventory(row[0]) : null;
+}
+
+export async function updateInventoryFlags(
+  id: number,
+  flags: { isStand: boolean; noStand: boolean; noFree: boolean },
+): Promise<InventoryItem | null> {
+  await d1Run(
+    `UPDATE inventory SET is_stand = ?, no_stand = ?, no_free = ? WHERE id = ?`,
+    [flags.isStand ? 1 : 0, flags.noStand ? 1 : 0, flags.noFree ? 1 : 0, id],
+  );
+
+  const row = await d1All<InventoryRow>(
+    "SELECT * FROM inventory WHERE id = ?",
+    [id],
+  );
+  return row[0] ? rowToInventory(row[0]) : null;
+}
+
+export async function createInventoryItem(
+  item: NewInventoryItem,
+): Promise<InventoryItem> {
+  const [{ next_id }] = await d1All<{ next_id: number }>(
+    "SELECT COALESCE(MAX(id), 0) + 1 AS next_id FROM inventory",
+  );
+
+  await d1Run(
+    `INSERT INTO inventory (id, name, qty, price, cat, no_stand, no_free, is_stand)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      next_id,
+      item.name.trim(),
+      item.qty,
+      item.price,
+      item.cat,
+      item.noStand ? 1 : 0,
+      item.noFree ? 1 : 0,
+      item.isStand ? 1 : 0,
+    ],
+  );
+
+  const row = await d1All<InventoryRow>("SELECT * FROM inventory WHERE id = ?", [
+    next_id,
+  ]);
+  if (!row[0]) throw new Error("Failed to create inventory item");
+  return rowToInventory(row[0]);
+}
+
+export async function countActiveRentalQty(itemId: number): Promise<number> {
+  const rows = await d1All<{ total: number }>(
+    `SELECT COALESCE(SUM(ri.qty), 0) AS total
+     FROM rental_items ri
+     INNER JOIN rentals r ON r.id = ri.rental_id
+     WHERE ri.item_id = ? AND r.status = 'out'`,
+    [itemId],
+  );
+  return rows[0]?.total ?? 0;
+}
+
+export async function deleteInventoryItem(
+  id: number,
+): Promise<InventoryItem | null> {
+  const rows = await d1All<InventoryRow>(
+    "SELECT * FROM inventory WHERE id = ?",
+    [id],
+  );
+  if (!rows[0]) return null;
+
+  const activeQty = await countActiveRentalQty(id);
+  if (activeQty > 0) throw new InventoryInUseError(activeQty);
+
+  await d1Run("DELETE FROM inventory WHERE id = ?", [id]);
+  return rowToInventory(rows[0]);
 }
 
 export async function listRentals(): Promise<RentalRecord[]> {
@@ -106,7 +190,7 @@ export async function createRental(rental: RentalRecord): Promise<RentalRecord> 
       ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
       params: [
         rental.id,
-        item.id,
+        typeof item.id === "number" ? item.id : Number(item.id),
         item.name,
         item.qty,
         item.unit,

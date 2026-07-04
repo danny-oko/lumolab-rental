@@ -18,8 +18,16 @@
   --row-hover: #1a212d;
   --row-line: #1b2230;
   --th-fill: #23303f;
-  --radius: 10px;
+  --radius: 12px;
   --radius-sm: 8px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 48px;
 }
 
 [data-theme="light"] {
@@ -63,10 +71,13 @@ body {
 }
 
 .lumo-app {
-  max-width: 1280px;
+  max-width: 1320px;
   margin: 0 auto;
-  padding: 18px 20px 32px;
+  padding: var(--space-6) var(--space-5) var(--space-8);
   min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
 }
 
 .lumo-app h1 {
@@ -87,10 +98,7 @@ body {
 .lumo-app header {
   display: flex;
   align-items: center;
-  gap: 14px;
-  border-bottom: 1px solid var(--line);
-  padding-bottom: 14px;
-  margin-bottom: 16px;
+  gap: var(--space-4);
 }
 
 .lumo-app .logo {
@@ -98,10 +106,14 @@ body {
   width: 38px;
   height: 38px;
   border-radius: var(--radius-sm);
-  background: var(--acc);
-  color: var(--acc-ink);
-  display: grid;
-  place-items: center;
+  overflow: hidden;
+}
+
+.lumo-app .logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .lumo-app .header-text {
@@ -133,88 +145,131 @@ body {
 .lumo-app .stats-row {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 10px;
+  gap: var(--space-3);
   width: 100%;
-  margin-bottom: 16px;
 }
 
 .lumo-app .stat {
-  background: var(--panel2);
+  background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  padding: 12px 14px;
+  border-radius: var(--radius);
+  padding: var(--space-4) var(--space-3);
   min-width: 0;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-height: 92px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.lumo-app .stat:hover {
+  border-color: color-mix(in srgb, var(--acc) 30%, var(--line));
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--bg) 70%, transparent);
 }
 
 .lumo-app .stat .v {
-  font-size: 22px;
+  font-size: clamp(22px, 3vw, 28px);
   font-weight: 800;
   line-height: 1.1;
+  font-variant-numeric: tabular-nums;
 }
 
 .lumo-app .stat .l {
   color: var(--mut);
   font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
-  margin-top: 4px;
-  line-height: 1.3;
+  letter-spacing: 0.5px;
+  line-height: 1.35;
+  max-width: 12ch;
+}
+
+/* ── Tab shell (tabs + content) ── */
+.lumo-app .tab-shell {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--ink) 4%, transparent);
 }
 
 /* ── Tabs ── */
 .lumo-app .tabs {
   display: flex;
-  gap: 4px;
+  gap: var(--space-1);
   margin-bottom: 0;
+  padding: var(--space-2) var(--space-3) 0;
   border-bottom: 1px solid var(--line);
+  background: var(--panel);
 }
 
 .lumo-app .tab {
   appearance: none;
   font-family: inherit;
-  padding: 10px 16px;
+  padding: 12px 18px;
   border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-  background: var(--panel);
+  background: transparent;
   color: var(--mut);
-  border: 1px solid var(--line);
-  border-bottom: none;
+  border: none;
   cursor: pointer;
   font-weight: 600;
   font-size: 13px;
   line-height: 1.3;
   transition: color 0.15s, background 0.15s;
   position: relative;
-  bottom: -1px;
+  white-space: nowrap;
 }
 
 .lumo-app .tab:hover {
   color: var(--ink);
+  background: color-mix(in srgb, var(--panel2) 60%, transparent);
 }
 
 .lumo-app .tab.on {
   background: var(--panel2);
-  color: var(--acc);
-  border-color: var(--line);
-  border-bottom: 1px solid var(--panel2);
+  color: var(--ink);
   z-index: 1;
+}
+
+.lumo-app .tab.on::before {
+  content: "";
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  top: 0;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: var(--acc);
 }
 
 /* ── Main content area ── */
 .lumo-app .main-content {
   background: var(--panel2);
-  border: 1px solid var(--line);
-  border-top: none;
-  border-radius: 0 0 var(--radius) var(--radius);
-  padding: 16px;
+  border: none;
+  border-radius: 0;
+  padding: var(--space-5);
   min-width: 0;
+  flex: 1;
+}
+
+.lumo-app .main-content > .panel {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
 }
 
 .lumo-app .panel {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
-  padding: 16px;
+  padding: var(--space-4);
   min-width: 0;
 }
 
@@ -226,13 +281,85 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
 }
 
 .lumo-app .panel-head strong {
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.35;
+  display: block;
+}
+
+.lumo-app .panel-sub {
+  color: var(--mut);
+  font-size: 12px;
+  margin-top: var(--space-1);
+  line-height: 1.4;
+}
+
+.lumo-app .panel-sub__dot {
+  margin: 0 var(--space-1);
+  opacity: 0.6;
+}
+
+.lumo-app .panel-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.lumo-app .panel-head--wrap {
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.lumo-app .filter-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.lumo-app .filter-pill {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--mut);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.lumo-app .filter-pill:hover {
+  border-color: var(--acc);
+  color: var(--ink);
+}
+
+.lumo-app .filter-pill.active {
+  border-color: var(--acc);
+  background: color-mix(in srgb, var(--acc) 12%, var(--panel));
+  color: var(--acc);
+}
+
+.lumo-app .filter-pill__count {
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--th-fill);
+  color: var(--mut);
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
+.lumo-app .filter-pill.active .filter-pill__count {
+  background: color-mix(in srgb, var(--acc) 20%, transparent);
+  color: var(--acc);
 }
 
 .lumo-app .panel-note {
@@ -266,33 +393,47 @@ body {
 
 .lumo-app .table-inv {
   width: 100%;
-  min-width: 720px;
+  min-width: 920px;
   table-layout: fixed;
 }
 
 .lumo-app .table-inv .col-inv-name {
-  width: 34%;
+  width: 24%;
 }
 
 .lumo-app .table-inv .col-inv-cat {
-  width: 13%;
+  width: 11%;
 }
 
-.lumo-app .table-inv .col-inv-qty {
-  width: 10%;
-}
-
-.lumo-app .table-inv .col-inv-avail {
-  width: 9%;
-}
-
-.lumo-app .table-inv .col-inv-price {
+.lumo-app .table-inv .col-inv-flag {
   width: 14%;
 }
 
-.lumo-app .table-inv .col-inv-status {
+.lumo-app .table-inv .col-inv-qty {
+  width: 8%;
+}
+
+.lumo-app .table-inv .col-inv-avail {
+  width: 8%;
+}
+
+.lumo-app .table-inv .col-inv-price {
   width: 12%;
+}
+
+.lumo-app .table-inv .col-inv-status {
+  width: 10%;
   text-align: center;
+}
+
+.lumo-app .table-inv .col-inv-actions {
+  width: 9%;
+  text-align: right;
+}
+
+.lumo-app .table-inv td.col-inv-actions {
+  text-align: right;
+  vertical-align: middle;
 }
 
 .lumo-app .table-inv td.col-inv-status {
@@ -312,6 +453,160 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* ── Inventory add / edit ── */
+.lumo-app .panel-head--inv {
+  align-items: flex-start;
+}
+
+.lumo-app .panel-head__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.lumo-app .sync-status {
+  font-size: 11px;
+  color: var(--warn);
+  white-space: nowrap;
+}
+
+.lumo-app .inv-add-form {
+  margin-bottom: 14px;
+  padding: 14px;
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.lumo-app .inv-add-form__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.lumo-app .inv-flag-select {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  field-sizing: fixed;
+  padding: 6px 26px 6px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: var(--input-bg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b97a8' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  background-size: 11px;
+  cursor: pointer;
+}
+
+.lumo-app .table-inv .col-inv-flag {
+  vertical-align: middle;
+}
+
+.lumo-app .inv-add-form__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.lumo-app .inv-add-form__field {
+  min-width: 0;
+}
+
+.lumo-app .inv-add-form__field > span {
+  display: block;
+  color: var(--mut);
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.lumo-app .inv-name-edit {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.lumo-app .inv-name-edit__icon {
+  flex-shrink: 0;
+  color: var(--acc);
+  display: flex;
+  margin-top: 6px;
+}
+
+.lumo-app .inv-name-edit__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.lumo-app .inv-name-input {
+  width: 100%;
+  padding: 6px 8px !important;
+  font-size: 13px;
+}
+
+.lumo-app .inv-view-text {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--txt);
+}
+
+.lumo-app .inv-view-text--muted {
+  color: var(--mut);
+  font-weight: 500;
+  font-size: 12px;
+}
+
+.lumo-app .table-inv .inv-row--editing td {
+  vertical-align: middle;
+}
+
+.lumo-app .inv-save-all-btn {
+  color: var(--in);
+  background: var(--chip-in-bg);
+  border-color: color-mix(in srgb, var(--in) 35%, var(--line));
+}
+
+.lumo-app .inv-save-all-btn:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.lumo-app .sync-badge {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+.lumo-app .sync-badge.saving {
+  color: var(--warn);
+  border: 1px solid color-mix(in srgb, var(--warn) 40%, var(--line));
+}
+
+.lumo-app .sync-badge.saved {
+  color: var(--in);
+  background: var(--chip-in-bg);
+}
+
+.lumo-app .sync-badge.error {
+  color: var(--out);
+  background: var(--chip-out-bg);
 }
 
 .lumo-app .table-rent {
@@ -363,15 +658,147 @@ body {
   background: color-mix(in srgb, var(--acc) 10%, var(--panel));
 }
 
+.lumo-app .table-wrap--flush {
+  margin-top: 0;
+}
+
 .lumo-app .table-active {
-  min-width: 820px;
+  table-layout: fixed;
+  width: 100%;
+  min-width: 900px;
+}
+
+.lumo-app .table-active th,
+.lumo-app .table-active td {
+  padding: 10px 12px;
+  vertical-align: top;
+}
+
+.lumo-app .table-active .col-id {
+  width: 92px;
+}
+
+.lumo-app .table-active .col-date {
+  width: 124px;
+  white-space: nowrap;
+}
+
+.lumo-app .table-active .col-cust {
+  width: 128px;
+}
+
+.lumo-app .table-active .col-items {
+  width: auto;
+}
+
+.lumo-app .table-active .col-dur {
+  width: 96px;
+}
+
+.lumo-app .table-active .col-total {
+  width: 108px;
+}
+
+.lumo-app .table-active .col-status {
+  width: 88px;
+  vertical-align: middle;
+}
+
+.lumo-app .table-active .col-actions {
+  width: 148px;
+  vertical-align: middle;
+}
+
+.lumo-app .table-active .col-items {
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.lumo-app .table-active .col-actions .actions-row {
+  flex-wrap: nowrap;
+}
+
+.lumo-app .table-active thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  box-shadow: 0 1px 0 var(--line);
+}
+
+.lumo-app .table-wrap:has(.table-active) {
+  max-height: min(640px, calc(100dvh - 340px));
+  overflow: auto;
+}
+
+.lumo-app .table-activity {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.lumo-app .table-activity .col-act-time {
+  width: 128px;
+  white-space: nowrap;
+}
+
+.lumo-app .table-activity .col-act-kind {
+  width: 72px;
+}
+
+.lumo-app .table-activity .col-act-action {
+  width: 88px;
+}
+
+.lumo-app .table-activity .col-act-summary {
+  width: auto;
+}
+
+.lumo-app .table-activity .col-act-detail {
+  width: 24%;
+  word-break: break-word;
+}
+
+.lumo-app .table-activity .col-act-actions {
+  width: 88px;
+  vertical-align: middle;
+}
+
+.lumo-app .table-wrap:has(.table-activity) {
+  max-height: min(420px, calc(100dvh - 480px));
+  overflow: auto;
+}
+
+.lumo-app .cell-primary {
+  font-weight: 600;
+}
+
+.lumo-app .cell-sub {
+  font-size: 12px;
+  margin-top: 2px;
+  line-height: 1.35;
+}
+
+.lumo-app .table-active .cell-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lumo-app .table-active .cell-stack .cell-sub {
+  margin-top: 0;
+}
+
+.lumo-app .mono {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--mut);
+  letter-spacing: -0.02em;
 }
 
 .lumo-app th {
   text-align: left;
   color: var(--mut);
   font-weight: 600;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-bottom: 1px solid var(--line);
   font-size: 11px;
   text-transform: uppercase;
@@ -381,9 +808,11 @@ body {
 }
 
 .lumo-app td {
-  padding: 10px 12px;
+  padding: 14px;
   border-bottom: 1px solid var(--row-line);
   vertical-align: middle;
+  font-size: 13px;
+  line-height: 1.4;
 }
 
 .lumo-app tr:last-child td {
@@ -403,6 +832,7 @@ body {
   text-align: center;
 }
 
+.lumo-app .col-center .inv-num-input,
 .lumo-app .col-center input[type="number"] {
   display: block;
   margin-inline: auto;
@@ -429,6 +859,22 @@ body {
   line-height: 32px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+}
+
+.lumo-app .inv-num-input {
+  background: var(--input-bg);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: 7px;
+  font-family: inherit;
+  width: 100%;
+  max-width: 100%;
+}
+
+.lumo-app .inv-num-input:focus {
+  outline: none;
+  border-color: var(--acc);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--acc) 25%, transparent);
 }
 
 .lumo-app .input-sm {
@@ -528,6 +974,11 @@ body {
 .lumo-app .chip.zero {
   background: var(--chip-zero-bg);
   color: var(--mut);
+}
+
+.lumo-app .chip.sm {
+  padding: 2px 7px;
+  font-size: 10px;
 }
 
 .lumo-app .badge {
@@ -631,6 +1082,17 @@ body {
   filter: brightness(1.05);
 }
 
+.lumo-app .btn.danger {
+  color: var(--out);
+  border-color: color-mix(in srgb, var(--out) 35%, var(--line));
+}
+
+.lumo-app .btn.danger:hover:not(:disabled) {
+  border-color: var(--out);
+  color: var(--out);
+  background: color-mix(in srgb, var(--out) 8%, transparent);
+}
+
 .lumo-app .btn.block {
   width: 100%;
   margin-top: 12px;
@@ -638,9 +1100,10 @@ body {
 
 .lumo-app .actions-row {
   display: flex;
-  gap: 6px;
+  gap: var(--space-2);
   flex-wrap: wrap;
   justify-content: flex-end;
+  align-items: center;
 }
 
 /* ── Rental layout ── */
@@ -966,10 +1429,18 @@ body {
 }
 
 .lumo-app .empty-state {
-  padding: 20px;
+  padding: var(--space-7) var(--space-5);
   text-align: center;
   color: var(--mut);
   font-size: 13px;
+  line-height: 1.5;
+}
+
+.lumo-app .empty-state--card {
+  background: var(--panel);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-sm);
+  margin-top: var(--space-2);
 }
 
 .lumo-app .alert {
@@ -1039,11 +1510,16 @@ body {
 
 @media (max-width: 1024px) {
   .lumo-app {
-    padding: 14px 12px 28px;
+    padding: var(--space-4) var(--space-3) var(--space-7);
+    gap: var(--space-5);
   }
 
   .lumo-app .stats-row {
     grid-template-columns: repeat(3, 1fr);
+  }
+
+  .lumo-app .stat {
+    min-height: 80px;
   }
 
   .lumo-app .cart {
@@ -1072,36 +1548,46 @@ body {
   }
 
   .lumo-app .main-content {
-    padding: 12px;
+    padding: var(--space-4);
+  }
+
+  .lumo-app .table-wrap:has(.table-active) {
+    max-height: none;
   }
 }
 
 /* ── Mobile (≤640px) ── */
 @media (max-width: 640px) {
   .lumo-app {
-    padding: 12px 10px 24px;
+    padding: var(--space-3) var(--space-2) var(--space-6);
+    gap: var(--space-4);
   }
 
   .lumo-app header {
-    gap: 10px;
+    gap: var(--space-2);
   }
 
   .lumo-app .stats-row {
     grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    gap: var(--space-2);
   }
 
   .lumo-app .stat {
-    padding: 10px 12px;
+    padding: var(--space-3);
+    min-height: 72px;
   }
 
   .lumo-app .stat .v {
     font-size: 20px;
   }
 
+  .lumo-app .tabs {
+    padding: var(--space-1) var(--space-2) 0;
+  }
+
   .lumo-app .tab {
     font-size: 11px;
-    padding: 9px 10px;
+    padding: 10px 12px;
   }
 
   .lumo-app .panel {
@@ -1119,5 +1605,18 @@ body {
 
   .lumo-app .rental-cart__options {
     grid-template-columns: 1fr;
+  }
+
+  .lumo-app .inv-add-form__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lumo-app .panel-head--inv {
+    flex-direction: column;
+  }
+
+  .lumo-app .panel-head__actions {
+    width: 100%;
+    justify-content: space-between;
   }
 }

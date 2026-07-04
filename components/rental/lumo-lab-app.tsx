@@ -49,33 +49,53 @@ export function LumoLabApp() {
         standsAvail={app.standsAvail}
       />
 
-      <TabNav
-        tab={app.tab}
-        cartCount={app.cartCount}
-        onTabChange={app.setTab}
-      />
+      <div className="tab-shell">
+        <TabNav
+          tab={app.tab}
+          cartCount={app.cartCount}
+          onTabChange={app.setTab}
+        />
 
-      <main className="main-content">
-        {app.tab === "inv" && (
-          <InventoryPanel
-            inv={app.inv}
-            filteredInv={app.filteredInv}
-            catFilter={app.catFilter}
-            avail={app.avail}
-            onFilterChange={app.setCatFilter}
-            onEditStock={app.editStock}
-          />
-        )}
+        <main className="main-content">
+          {app.tab === "inv" && (
+            <InventoryPanel
+              inv={app.inv}
+              filteredInv={app.filteredInv}
+              catFilter={app.catFilter}
+              avail={app.avail}
+              busy={app.busy}
+              invEditing={app.invEditing}
+              invHasChanges={app.invHasChanges}
+              invSaveState={app.invSaveState}
+              onFilterChange={app.setCatFilter}
+              onStartEditing={app.startInvEditing}
+              onEditStock={app.editStock}
+              onSaveAll={() => void app.saveAllInvChanges()}
+              onDiscardAll={app.discardAllInvChanges}
+              onEditFlagMode={app.editFlagMode}
+              onAddItem={app.addItem}
+              onDeleteItem={(id) => void app.deleteItem(id)}
+              itemOutQty={app.itemOutQty}
+            />
+          )}
 
-        {app.tab === "rent" && <RentalPanel {...app} />}
+          {app.tab === "rent" && <RentalPanel {...app} />}
 
-        {app.tab === "active" && (
-          <ActiveRentalsPanel
-            rentals={app.rentals}
-            onReturn={app.returnRental}
-          />
-        )}
-      </main>
+          {app.tab === "active" && (
+            <ActiveRentalsPanel
+              rentals={app.rentals}
+              filteredRentals={app.filteredRentals}
+              rentalFilter={app.rentalFilter}
+              activity={app.activity}
+              busy={app.busy}
+              onFilterChange={app.setRentalFilter}
+              onReturn={app.returnRental}
+              onDeleteActivity={(id) => void app.deleteActivityLog(id)}
+              onDeleteAllActivity={() => void app.deleteAllActivityLogs()}
+            />
+          )}
+        </main>
+      </div>
     </div>
   );
 }
