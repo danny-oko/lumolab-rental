@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
 import type { Category } from "@/lib/rental/types";
+import type { ReactNode } from "react";
 
 const Ico = ({ d, size = 22 }: { d: ReactNode; size?: number }) => (
   <svg
@@ -72,10 +72,7 @@ const ICON_PATHS: Record<Category, ReactNode> = {
   БУСАД: (
     <g>
       <path d="M20 32 L60 14 L100 32 L100 72 L60 90 L20 72 Z" />
-      <path
-        d="M20 32 L60 50 L100 32 M60 50 L60 90"
-        strokeWidth="3"
-      />
+      <path d="M20 32 L60 50 L100 32 M60 50 L60 90" strokeWidth="3" />
     </g>
   ),
 };
@@ -98,7 +95,9 @@ export const CatIcon = ({
   className?: string;
 }) => (
   <span
-    className={["cat-icon", CAT_ICON_CLASS[cat], className].filter(Boolean).join(" ")}
+    className={["cat-icon", CAT_ICON_CLASS[cat], className]
+      .filter(Boolean)
+      .join(" ")}
   >
     <Ico size={size} d={ICON_PATHS[cat] || ICON_PATHS["БУСАД"]} />
   </span>

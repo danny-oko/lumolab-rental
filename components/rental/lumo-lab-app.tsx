@@ -91,14 +91,11 @@ export function LumoLabApp() {
               rentals={app.rentals}
               filteredRentals={app.filteredRentals}
               rentalFilter={app.rentalFilter}
-              activity={app.activity}
               busy={app.busy}
               onFilterChange={app.setRentalFilter}
               onReturn={app.returnRental}
               onDeleteRental={(id) => void app.deleteRental(id)}
               onDeleteAllRentals={() => void app.deleteAllRentals()}
-              onDeleteActivity={(id) => void app.deleteActivityLog(id)}
-              onDeleteAllActivity={() => void app.deleteAllActivityLogs()}
             />
           )}
         </main>

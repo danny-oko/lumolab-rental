@@ -17,7 +17,6 @@ import {
   type InvFlagMode,
 } from "@/lib/rental/inv-flags";
 import type {
-  ActivityLogEntry,
   Category,
   Customer,
   InventoryItem,
@@ -124,7 +123,6 @@ export function useRentalApp() {
   const [cart, setCart] = useState<Record<number, number>>({});
   const [days, setDays] = useState(0.5);
   const [rentals, setRentals] = useState<RentalRecord[]>([]);
-  const [activity, setActivity] = useState<ActivityLogEntry[]>([]);
   const [rentalFilter, setRentalFilter] = useState<RentalHistoryFilter>("all");
   const [cust, setCust] = useState<Customer>(emptyCustomer);
   const [priceMode, setPriceMode] = useState<PriceMode>("base");
@@ -204,10 +202,6 @@ export function useRentalApp() {
     [pendingInventoryIds],
   );
 
-  const applyActivity = useCallback((logs: ActivityLogEntry[]) => {
-    setActivity(logs);
-  }, []);
-
   const syncData = useCallback(async () => {
     if (
       document.hidden ||
@@ -219,43 +213,33 @@ export function useRentalApp() {
     }
     syncingRef.current = true;
     try {
-      const [inventory, rentalList, activityResult] = await Promise.all([
+      const [inventory, rentalList] = await Promise.all([
         apiJson<InventoryItem[]>("/api/inventory"),
         apiJson<RentalRecord[]>("/api/rentals"),
-        fetch("/api/activity").then(async (res) => {
-          if (!res.ok) return [] as ActivityLogEntry[];
-          return (await res.json()) as ActivityLogEntry[];
-        }),
       ]);
       applyServerData(inventory, rentalList);
-      applyActivity(activityResult);
     } catch (err) {
       console.warn("Background sync failed:", err);
     } finally {
       syncingRef.current = false;
     }
-  }, [applyServerData, applyActivity]);
+  }, [applyServerData]);
 
   const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [inventory, rentalList, activityResult] = await Promise.all([
+      const [inventory, rentalList] = await Promise.all([
         apiJson<InventoryItem[]>("/api/inventory"),
         apiJson<RentalRecord[]>("/api/rentals"),
-        fetch("/api/activity").then(async (res) => {
-          if (!res.ok) return [] as ActivityLogEntry[];
-          return (await res.json()) as ActivityLogEntry[];
-        }),
       ]);
       applyServerData(inventory, rentalList, true);
-      applyActivity(activityResult);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load data");
     } finally {
       setLoading(false);
     }
-  }, [applyServerData, applyActivity]);
+  }, [applyServerData]);
 
   useEffect(() => {
     void loadData();
@@ -438,15 +422,6 @@ export function useRentalApp() {
     );
   }
 
-  async function refreshActivity() {
-    try {
-      const logs = await apiJson<ActivityLogEntry[]>("/api/activity");
-      applyActivity(logs);
-    } catch (err) {
-      console.warn("Activity refresh failed:", err);
-    }
-  }
-
   async function addItem(item: Omit<InventoryItem, "id">) {
     try {
       setBusy(true);
@@ -460,7 +435,6 @@ export function useRentalApp() {
         next.set(created.id, { ...created });
         return next;
       });
-      await refreshActivity();
       return created;
     } catch (err) {
       void showError(err);
@@ -514,74 +488,6 @@ export function useRentalApp() {
         delete next[id];
         return next;
       });
-      await refreshActivity();
-    } catch (err) {
-      void showError(err);
-      console.error(err);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function deleteActivityLog(id: number) {
-    if (
-      !(await confirm({
-        title: "Бүртгэл устгах",
-        message: "Энэ бүртгэлийг устгах уу?",
-        confirmLabel: "Устгах",
-        danger: true,
-      }))
-    ) {
-      return;
-    }
-
-    try {
-      setBusy(true);
-      await apiJson<{ ok: boolean }>("/api/activity", {
-        method: "DELETE",
-        body: JSON.stringify({ id: Number(id) }),
-      });
-      await refreshActivity();
-    } catch (err) {
-      void showError(err);
-      console.error(err);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function deleteAllActivityLogs() {
-    if (activity.length === 0) return;
-
-    let total = activity.length;
-    try {
-      const countRes = await fetch("/api/activity?count=1");
-      if (countRes.ok) {
-        const data = (await countRes.json()) as { total?: number };
-        if (typeof data.total === "number") total = data.total;
-      }
-    } catch {
-      // fall back to visible count
-    }
-
-    if (
-      !(await confirm({
-        title: "Бүгдийг устгах",
-        message: `${total} бүртгэлийг бүгдийг нь устгах уу?\n\nЭнэ үйлдлийг буцаах боломжгүй.`,
-        confirmLabel: "Устгах",
-        danger: true,
-      }))
-    ) {
-      return;
-    }
-
-    try {
-      setBusy(true);
-      await apiJson<{ ok: boolean; deleted: number }>("/api/activity", {
-        method: "DELETE",
-        body: JSON.stringify({ all: true }),
-      });
-      await refreshActivity();
     } catch (err) {
       void showError(err);
       console.error(err);
@@ -644,7 +550,6 @@ export function useRentalApp() {
       setDays(0.5);
       setCust(emptyCustomer);
       setTab("active");
-      await refreshActivity();
     } catch (err) {
       void showError(err);
       console.error(err);
@@ -660,7 +565,6 @@ export function useRentalApp() {
         method: "POST",
       });
       setRentals((rs) => rs.map((r) => (r.id === rid ? updated : r)));
-      await refreshActivity();
     } catch (err) {
       void showError(err);
       console.error(err);
@@ -695,7 +599,6 @@ export function useRentalApp() {
         method: "DELETE",
       });
       setRentals((rs) => rs.filter((r) => r.id !== rid));
-      await refreshActivity();
     } catch (err) {
       void showError(err);
       console.error(err);
@@ -731,7 +634,6 @@ export function useRentalApp() {
         body: JSON.stringify({ all: true }),
       });
       setRentals([]);
-      await refreshActivity();
     } catch (err) {
       void showError(err);
       console.error(err);
@@ -766,7 +668,6 @@ export function useRentalApp() {
     days,
     setDays,
     rentals,
-    activity,
     rentalFilter,
     setRentalFilter,
     filteredRentals,
@@ -818,8 +719,6 @@ export function useRentalApp() {
     editFlagMode,
     addItem,
     deleteItem,
-    deleteActivityLog,
-    deleteAllActivityLogs,
     confirmState,
     alertState,
     showAlert,
