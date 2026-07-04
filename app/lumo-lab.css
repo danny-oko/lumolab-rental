@@ -1,0 +1,1123 @@
+:root {
+  --bg: #0e1116;
+  --panel: #161b22;
+  --panel2: #1c2330;
+  --line: #2a3343;
+  --ink: #e6edf3;
+  --mut: #8b97a8;
+  --acc: #7cff4f;
+  --acc-d: #5ed433;
+  --warn: #ffb84d;
+  --out: #ff6b6b;
+  --in: #3fb950;
+  --acc-ink: #04210a;
+  --chip-in-bg: #16331a;
+  --chip-out-bg: #3a1b1b;
+  --chip-zero-bg: #2a2f3a;
+  --input-bg: #1c2330;
+  --row-hover: #1a212d;
+  --row-line: #1b2230;
+  --th-fill: #23303f;
+  --radius: 10px;
+  --radius-sm: 8px;
+}
+
+[data-theme="light"] {
+  --bg: #f6f7f9;
+  --panel: #ffffff;
+  --panel2: #f0f2f5;
+  --line: #d8dee6;
+  --ink: #1a2230;
+  --mut: #5d6b7e;
+  --acc: #3fae22;
+  --acc-d: #2f8c19;
+  --warn: #c8851b;
+  --out: #d83a3a;
+  --in: #2f8c19;
+  --acc-ink: #ffffff;
+  --chip-in-bg: #dcf3df;
+  --chip-out-bg: #fae0e0;
+  --chip-zero-bg: #e7ebf0;
+  --input-bg: #ffffff;
+  --row-hover: #f3f5f8;
+  --row-line: #eaedf1;
+  --th-fill: #e7ebf0;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Inter", -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+  transition: background 0.2s, color 0.2s;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.lumo-app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 18px 20px 32px;
+  min-height: 100dvh;
+}
+
+.lumo-app h1 {
+  font-size: clamp(17px, 2.5vw, 20px);
+  margin: 0;
+  letter-spacing: 0.3px;
+  line-height: 1.25;
+}
+
+.lumo-app .sub {
+  color: var(--mut);
+  font-size: 12px;
+  margin-top: 3px;
+  line-height: 1.35;
+}
+
+/* ── Header ── */
+.lumo-app header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+}
+
+.lumo-app .logo {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  background: var(--acc);
+  color: var(--acc-ink);
+  display: grid;
+  place-items: center;
+}
+
+.lumo-app .header-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.lumo-app .theme-btn {
+  flex-shrink: 0;
+  margin-left: auto;
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 18px;
+  display: grid;
+  place-items: center;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.lumo-app .theme-btn:hover {
+  border-color: var(--acc);
+}
+
+/* ── Stats ── */
+.lumo-app .stats-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.lumo-app .stat {
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  min-width: 0;
+  text-align: center;
+}
+
+.lumo-app .stat .v {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.lumo-app .stat .l {
+  color: var(--mut);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-top: 4px;
+  line-height: 1.3;
+}
+
+/* ── Tabs ── */
+.lumo-app .tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.lumo-app .tab {
+  appearance: none;
+  font-family: inherit;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: var(--panel);
+  color: var(--mut);
+  border: 1px solid var(--line);
+  border-bottom: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1.3;
+  transition: color 0.15s, background 0.15s;
+  position: relative;
+  bottom: -1px;
+}
+
+.lumo-app .tab:hover {
+  color: var(--ink);
+}
+
+.lumo-app .tab.on {
+  background: var(--panel2);
+  color: var(--acc);
+  border-color: var(--line);
+  border-bottom: 1px solid var(--panel2);
+  z-index: 1;
+}
+
+/* ── Main content area ── */
+.lumo-app .main-content {
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  padding: 16px;
+  min-width: 0;
+}
+
+.lumo-app .panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  min-width: 0;
+}
+
+.lumo-app .panel + .panel {
+  margin-top: 0;
+}
+
+.lumo-app .panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.lumo-app .panel-head strong {
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.lumo-app .panel-note {
+  font-size: 12px;
+  color: var(--mut);
+  line-height: 1.45;
+  padding: 10px 12px;
+  background: var(--panel2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+}
+
+/* ── Tables ── */
+.lumo-app .table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+}
+
+.lumo-app table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.lumo-app table.tbl-fixed {
+  table-layout: fixed;
+}
+
+.lumo-app .table-inv {
+  width: 100%;
+  min-width: 720px;
+  table-layout: fixed;
+}
+
+.lumo-app .table-inv .col-inv-name {
+  width: 34%;
+}
+
+.lumo-app .table-inv .col-inv-cat {
+  width: 13%;
+}
+
+.lumo-app .table-inv .col-inv-qty {
+  width: 10%;
+}
+
+.lumo-app .table-inv .col-inv-avail {
+  width: 9%;
+}
+
+.lumo-app .table-inv .col-inv-price {
+  width: 14%;
+}
+
+.lumo-app .table-inv .col-inv-status {
+  width: 12%;
+  text-align: center;
+}
+
+.lumo-app .table-inv td.col-inv-status {
+  text-align: center;
+}
+
+.lumo-app .table-inv .col-inv-cat select {
+  width: 100%;
+  min-width: 0;
+}
+
+.lumo-app .table-inv .item-name {
+  flex-wrap: nowrap;
+}
+
+.lumo-app .table-inv .item-name__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lumo-app .table-rent {
+  table-layout: fixed;
+  width: 100%;
+  min-width: 520px;
+}
+
+.lumo-app .table-rent th,
+.lumo-app .table-rent td {
+  padding: 8px 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lumo-app .table-rent .col-name {
+  width: auto;
+}
+
+.lumo-app .table-rent .col-type {
+  width: 72px;
+}
+
+.lumo-app .table-rent .col-avail {
+  width: 56px;
+}
+
+.lumo-app .table-rent .col-price {
+  width: 92px;
+}
+
+.lumo-app .table-rent .col-qty {
+  width: 128px;
+}
+
+.lumo-app .table-rent .col-sum {
+  width: 88px;
+}
+
+.lumo-app .table-rent td.col-qty {
+  overflow: visible;
+}
+
+.lumo-app .table-rent tbody tr.is-selected td {
+  background: color-mix(in srgb, var(--acc) 6%, var(--panel));
+}
+
+.lumo-app .table-rent tbody tr.is-selected:hover td {
+  background: color-mix(in srgb, var(--acc) 10%, var(--panel));
+}
+
+.lumo-app .table-active {
+  min-width: 820px;
+}
+
+.lumo-app th {
+  text-align: left;
+  color: var(--mut);
+  font-weight: 600;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  background: var(--th-fill);
+  white-space: nowrap;
+}
+
+.lumo-app td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--row-line);
+  vertical-align: middle;
+}
+
+.lumo-app tr:last-child td {
+  border-bottom: none;
+}
+
+.lumo-app tbody tr:hover td {
+  background: var(--row-hover);
+}
+
+.lumo-app .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.lumo-app .col-center {
+  text-align: center;
+}
+
+.lumo-app .col-center input[type="number"] {
+  display: block;
+  margin-inline: auto;
+  text-align: center !important;
+  height: 32px;
+  padding: 0 6px !important;
+  line-height: 32px;
+  box-sizing: border-box;
+  -moz-appearance: textfield;
+  appearance: textfield;
+  font-variant-numeric: tabular-nums;
+}
+
+.lumo-app .col-center input[type="number"]::-webkit-outer-spin-button,
+.lumo-app .col-center input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.lumo-app .col-center .ok,
+.lumo-app .col-center .danger {
+  display: inline-block;
+  min-width: 32px;
+  line-height: 32px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.lumo-app .input-sm {
+  width: 56px !important;
+  max-width: 100%;
+}
+
+.lumo-app .input-md {
+  width: 88px !important;
+  max-width: 100%;
+}
+
+.lumo-app .price {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ── Item name cell ── */
+.lumo-app .item-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.lumo-app .item-name__icon {
+  flex-shrink: 0;
+  color: var(--acc);
+  display: flex;
+}
+
+.lumo-app .item-name__text {
+  min-width: 0;
+  word-break: break-word;
+}
+
+/* ── Qty stepper ── */
+.lumo-app .qty-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.lumo-app .qty-stepper__btn {
+  padding: 4px 10px !important;
+  min-width: 32px;
+}
+
+.lumo-app .qty-stepper__input {
+  width: 48px !important;
+  padding: 6px 4px !important;
+  text-align: center;
+}
+
+.lumo-app select.input-cat {
+  width: auto;
+  max-width: 100%;
+  field-sizing: content;
+  padding: 6px 22px 6px 8px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: var(--input-bg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b97a8' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  background-size: 11px;
+  cursor: pointer;
+}
+
+.lumo-app .table-inv .col-cat {
+  white-space: nowrap;
+}
+
+/* ── Chips & badges ── */
+.lumo-app .chip {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.lumo-app .chip.in {
+  background: var(--chip-in-bg);
+  color: var(--in);
+}
+
+.lumo-app .chip.out {
+  background: var(--chip-out-bg);
+  color: var(--out);
+}
+
+.lumo-app .chip.zero {
+  background: var(--chip-zero-bg);
+  color: var(--mut);
+}
+
+.lumo-app .badge {
+  font-size: 10px;
+  background: var(--th-fill);
+  color: var(--mut);
+  padding: 2px 6px;
+  border-radius: 5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Form controls ── */
+.lumo-app input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--acc);
+  cursor: pointer;
+}
+
+.lumo-app input[type="text"],
+.lumo-app input[type="number"],
+.lumo-app select,
+.lumo-app textarea,
+.lumo-app input[type="date"] {
+  background: var(--input-bg);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: 7px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  width: 100%;
+  max-width: 100%;
+}
+
+.lumo-app input:focus,
+.lumo-app select:focus,
+.lumo-app textarea:focus {
+  outline: none;
+  border-color: var(--acc);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--acc) 25%, transparent);
+}
+
+.lumo-app label {
+  display: block;
+  color: var(--mut);
+  font-size: 12px;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+/* ── Buttons ── */
+.lumo-app .btn {
+  background: var(--acc);
+  color: var(--acc-ink);
+  border: none;
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  line-height: 1.3;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.lumo-app .btn:hover:not(:disabled) {
+  background: var(--acc-d);
+}
+
+.lumo-app .btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.lumo-app .btn.ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+
+.lumo-app .btn.ghost:hover:not(:disabled) {
+  border-color: var(--acc);
+  color: var(--acc);
+  background: transparent;
+}
+
+.lumo-app .btn.sm {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.lumo-app .btn.warn {
+  background: var(--warn);
+  color: #fff;
+}
+
+.lumo-app .btn.warn:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+.lumo-app .btn.block {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.lumo-app .actions-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* ── Rental layout ── */
+.lumo-app .main-content:has(.rental-layout) {
+  padding: 14px;
+}
+
+.lumo-app .rental-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+  gap: 16px;
+  align-items: start;
+  width: 100%;
+}
+
+.lumo-app .rental-pane {
+  min-width: 0;
+}
+
+.lumo-app .rental-picker {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+}
+
+.lumo-app .rental-picker .panel-head {
+  margin-bottom: 0;
+}
+
+.lumo-app .rental-picker__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.lumo-app .rental-picker__count {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--acc) 15%, var(--panel2));
+  color: var(--acc);
+  border: 1px solid color-mix(in srgb, var(--acc) 30%, var(--line));
+}
+
+.lumo-app .rental-picker .pill-row {
+  margin: 12px 0;
+}
+
+.lumo-app .rental-picker .table-wrap {
+  min-width: 0;
+  width: 100%;
+  flex: 1;
+  max-height: min(560px, calc(100dvh - 260px));
+  overflow: auto;
+}
+
+.lumo-app .rental-picker .table-wrap thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  box-shadow: 0 1px 0 var(--line);
+}
+
+.lumo-app .rental-cart.panel {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.lumo-app .rental-cart {
+  position: sticky;
+  top: 12px;
+  align-self: start;
+  max-height: calc(100dvh - 24px);
+}
+
+.lumo-app .rental-cart__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.lumo-app .rental-cart__title {
+  font-size: 15px;
+  margin: 0;
+}
+
+.lumo-app .rental-cart__badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--acc);
+  color: var(--acc-ink);
+}
+
+.lumo-app .rental-cart__body {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.lumo-app .rental-cart__options {
+  display: grid;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--panel2);
+  border-bottom: 1px solid var(--line);
+}
+
+.lumo-app .rental-cart__option label {
+  margin-bottom: 8px;
+}
+
+.lumo-app .rental-cart__lines {
+  padding: 4px 16px;
+  min-height: 48px;
+}
+
+.lumo-app .rental-cart__lines .empty-state {
+  padding: 16px 8px;
+  font-size: 12px;
+}
+
+.lumo-app .rental-cart__totals {
+  margin: 8px 12px 12px;
+  padding: 12px 14px;
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.lumo-app .rental-cart__totals .cartline {
+  padding: 6px 0;
+  font-size: 12px;
+}
+
+.lumo-app .rental-cart__totals .cartline--grand {
+  padding-top: 10px;
+  margin-top: 4px;
+  border-top: 1px solid var(--line);
+  border-bottom: none;
+  font-size: 14px;
+}
+
+.lumo-app .rental-cart__totals .total {
+  font-size: 24px;
+}
+
+.lumo-app .rental-cart__customer {
+  padding: 14px 16px 16px;
+  border-top: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.lumo-app .rental-cart__customer .stack {
+  gap: 10px;
+}
+
+.lumo-app .rental-cart .standnote {
+  margin: 12px 16px 0;
+}
+
+.lumo-app .panel-head--stack {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+
+@container (max-width: 520px) {
+  .lumo-app .table-rent .col-type,
+  .lumo-app .table-rent td.col-type,
+  .lumo-app .table-rent th.col-type {
+    display: none;
+  }
+}
+
+.lumo-app .cart {
+  position: sticky;
+  top: 14px;
+  align-self: start;
+}
+
+.lumo-app .cartline {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--row-line);
+  font-size: 13px;
+}
+
+.lumo-app .cartline > span:first-child {
+  min-width: 0;
+  flex: 1;
+}
+
+.lumo-app .cartline > span:last-child {
+  flex-shrink: 0;
+}
+
+/* ── Segmented control ── */
+.lumo-app .seg {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.lumo-app .seg button {
+  flex: 1;
+  min-width: 0;
+  background: var(--panel2);
+  border: none;
+  color: var(--mut);
+  padding: 10px 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 12px;
+  font-family: inherit;
+  line-height: 1.25;
+  transition: background 0.15s, color 0.15s;
+  white-space: normal;
+  text-align: center;
+}
+
+.lumo-app .rental-cart .seg {
+  flex-wrap: nowrap;
+}
+
+.lumo-app .rental-cart .seg button {
+  flex: 1;
+  min-width: 0;
+  padding: 11px 6px;
+  font-size: 11px;
+}
+
+.lumo-app .seg--2 button {
+  flex: 1;
+}
+
+.lumo-app .seg button:hover:not(.on) {
+  color: var(--ink);
+}
+
+.lumo-app .seg button.on {
+  background: var(--acc);
+  color: var(--acc-ink);
+}
+
+.lumo-app .seg-hint {
+  font-size: 9px;
+  display: block;
+  opacity: 0.85;
+  margin-top: 2px;
+}
+
+/* ── Misc ── */
+.lumo-app .stack {
+  display: grid;
+  gap: 8px;
+}
+
+.lumo-app .field-block {
+  margin: 12px 0;
+}
+
+.lumo-app .muted {
+  color: var(--mut);
+}
+
+.lumo-app .total {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--acc);
+}
+
+.lumo-app .small {
+  font-size: 12px;
+}
+
+.lumo-app .standnote {
+  font-size: 12px;
+  color: var(--acc-d);
+  padding: 8px 10px;
+  background: color-mix(in srgb, var(--acc) 8%, var(--panel2));
+  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in srgb, var(--acc) 20%, var(--line));
+  line-height: 1.4;
+}
+
+.lumo-app .hr {
+  height: 1px;
+  background: var(--line);
+  margin: 14px 0;
+  border: none;
+}
+
+.lumo-app .pill-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 8px 0 10px;
+}
+
+.lumo-app .danger {
+  color: var(--out);
+}
+
+.lumo-app .ok {
+  color: var(--in);
+}
+
+.lumo-app .warn {
+  color: var(--warn);
+}
+
+.lumo-app .empty-state {
+  padding: 20px;
+  text-align: center;
+  color: var(--mut);
+  font-size: 13px;
+}
+
+.lumo-app .alert {
+  font-size: 12px;
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+.lumo-app .hint {
+  font-size: 12px;
+  color: var(--mut);
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+.lumo-app input[type="range"] {
+  width: 100%;
+  accent-color: var(--acc);
+  margin: 8px 0;
+}
+
+.lumo-app .range-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ── Scrollbar ── */
+.lumo-app ::-webkit-scrollbar,
+.table-wrap::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.lumo-app ::-webkit-scrollbar-thumb,
+.table-wrap::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 5px;
+}
+
+/* ── Tablet (≤1024px) ── */
+@media (max-width: 1100px) {
+  .lumo-app .rental-layout {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .lumo-app .rental-cart {
+    position: static;
+    max-height: none;
+  }
+
+  .lumo-app .rental-cart__body {
+    overflow: visible;
+  }
+
+  .lumo-app .rental-picker .table-wrap {
+    max-height: none;
+  }
+
+  .lumo-app .rental-cart__options {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 1024px) {
+  .lumo-app {
+    padding: 14px 12px 28px;
+  }
+
+  .lumo-app .stats-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .lumo-app .cart {
+    position: static;
+  }
+
+  .lumo-app .tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+  }
+
+  .lumo-app .tab {
+    flex: 1 0 auto;
+    min-width: max-content;
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+
+  .lumo-app .panel-head {
+    flex-direction: column;
+  }
+
+  .lumo-app table.tbl-fixed:not(.table-inv) {
+    table-layout: auto;
+  }
+
+  .lumo-app .main-content {
+    padding: 12px;
+  }
+}
+
+/* ── Mobile (≤640px) ── */
+@media (max-width: 640px) {
+  .lumo-app {
+    padding: 12px 10px 24px;
+  }
+
+  .lumo-app header {
+    gap: 10px;
+  }
+
+  .lumo-app .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .lumo-app .stat {
+    padding: 10px 12px;
+  }
+
+  .lumo-app .stat .v {
+    font-size: 20px;
+  }
+
+  .lumo-app .tab {
+    font-size: 11px;
+    padding: 9px 10px;
+  }
+
+  .lumo-app .panel {
+    padding: 12px;
+  }
+
+  .lumo-app .total {
+    font-size: 20px;
+  }
+
+  .lumo-app .seg button {
+    font-size: 11px;
+    padding: 9px 4px;
+  }
+
+  .lumo-app .rental-cart__options {
+    grid-template-columns: 1fr;
+  }
+}

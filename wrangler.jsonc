@@ -1,0 +1,13 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "lumolab-rental",
+  "compatibility_date": "2026-01-01",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "lumolab-rental",
+      "database_id": "2d86103d-7d17-44c9-a980-f98ff115125c",
+      "migrations_dir": "migrations"
+    }
+  ]
+}
