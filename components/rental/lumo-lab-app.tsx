@@ -2,6 +2,8 @@
 
 import { ActiveRentalsPanel } from "@/components/rental/active-rentals-panel";
 import { AppHeader } from "@/components/rental/app-header";
+import { AlertDialog } from "@/components/rental/alert-dialog";
+import { ConfirmDialog } from "@/components/rental/confirm-dialog";
 import { InventoryPanel } from "@/components/rental/inventory-panel";
 import { RentalPanel } from "@/components/rental/rental-panel";
 import { StatsBar } from "@/components/rental/stats-bar";
@@ -34,6 +36,8 @@ export function LumoLabApp() {
 
   return (
     <div className="lumo-app">
+      {app.confirmState && <ConfirmDialog {...app.confirmState} />}
+      {app.alertState && <AlertDialog {...app.alertState} />}
       <AppHeader
         theme={app.theme}
         onToggleTheme={() =>
@@ -75,6 +79,7 @@ export function LumoLabApp() {
               onEditFlagMode={app.editFlagMode}
               onAddItem={app.addItem}
               onDeleteItem={(id) => void app.deleteItem(id)}
+              onAlert={app.showAlert}
               itemOutQty={app.itemOutQty}
             />
           )}
@@ -90,6 +95,8 @@ export function LumoLabApp() {
               busy={app.busy}
               onFilterChange={app.setRentalFilter}
               onReturn={app.returnRental}
+              onDeleteRental={(id) => void app.deleteRental(id)}
+              onDeleteAllRentals={() => void app.deleteAllRentals()}
               onDeleteActivity={(id) => void app.deleteActivityLog(id)}
               onDeleteAllActivity={() => void app.deleteAllActivityLogs()}
             />

@@ -1,7 +1,7 @@
-import { createRentalSchema } from "@/lib/api/schemas";
+import { createRentalSchema, deleteAllRentalsSchema } from "@/lib/api/schemas";
 import { logRentalCheckout } from "@/lib/api/activity";
 import { parseJsonBody } from "@/lib/api/validate";
-import { createRental, listRentals } from "@/lib/db/repository";
+import { createRental, deleteAllRentals, listRentals } from "@/lib/db/repository";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -29,6 +29,22 @@ export async function POST(request: Request) {
     console.error("POST /api/rentals", err);
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Failed to create rental" },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  const parsed = await parseJsonBody(request, deleteAllRentalsSchema);
+  if ("error" in parsed) return parsed.error;
+
+  try {
+    const deleted = await deleteAllRentals();
+    return NextResponse.json({ ok: true, deleted });
+  } catch (err) {
+    console.error("DELETE /api/rentals", err);
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "Failed to delete rentals" },
       { status: 500 },
     );
   }

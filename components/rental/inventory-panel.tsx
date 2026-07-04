@@ -7,6 +7,7 @@ import { InvNumInput } from "@/components/rental/inv-num-input";
 import { InventoryAddForm } from "@/components/rental/inventory-add-form";
 import { ItemNameCell } from "@/components/rental/item-name-cell";
 import type { InventorySyncState } from "@/components/rental/use-rental-app";
+import type { AlertOptions } from "@/components/rental/use-alert-dialog";
 import { CATS } from "@/lib/rental/constants";
 import {
   getInvFlagMode,
@@ -37,6 +38,7 @@ type InventoryPanelProps = {
   onEditFlagMode: (id: number, mode: InvFlagMode) => void;
   onAddItem: (item: Omit<InventoryItem, "id">) => Promise<unknown>;
   onDeleteItem: (id: number) => void;
+  onAlert: (opts: AlertOptions | string) => Promise<void>;
   itemOutQty: (id: number) => number;
 };
 
@@ -61,6 +63,7 @@ export function InventoryPanel({
   onEditFlagMode,
   onAddItem,
   onDeleteItem,
+  onAlert,
   itemOutQty,
 }: InventoryPanelProps) {
   const [showAdd, setShowAdd] = useState(false);
@@ -121,6 +124,7 @@ export function InventoryPanel({
       {showAdd && (
         <InventoryAddForm
           busy={busy}
+          onAlert={onAlert}
           onAdd={async (item) => {
             await onAddItem(item);
             setShowAdd(false);

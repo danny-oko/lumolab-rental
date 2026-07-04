@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { InvFlagSelect } from "@/components/rental/inv-flag-select";
 import { InvNumInput } from "@/components/rental/inv-num-input";
+import type { AlertOptions } from "@/components/rental/use-alert-dialog";
 import { CATS } from "@/lib/rental/constants";
 import {
   flagModeToItemFlags,
@@ -21,18 +22,24 @@ const emptyItem = (): NewInventoryInput => ({
 
 type InventoryAddFormProps = {
   busy: boolean;
+  onAlert: (opts: AlertOptions | string) => Promise<void>;
   onAdd: (item: NewInventoryInput) => Promise<void>;
   onCancel: () => void;
 };
 
-export function InventoryAddForm({ busy, onAdd, onCancel }: InventoryAddFormProps) {
+export function InventoryAddForm({
+  busy,
+  onAlert,
+  onAdd,
+  onCancel,
+}: InventoryAddFormProps) {
   const [draft, setDraft] = useState<NewInventoryInput>(emptyItem);
   const [flagMode, setFlagMode] = useState<InvFlagMode>("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!draft.name.trim()) {
-      alert("Барааны нэрийг оруулна уу.");
+      void onAlert("Барааны нэрийг оруулна уу.");
       return;
     }
     await onAdd({

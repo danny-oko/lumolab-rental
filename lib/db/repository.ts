@@ -7,6 +7,7 @@ import {
   type RentalItemRow,
   type RentalRow,
 } from "@/lib/db/mappers";
+import { resolveInventoryItemId } from "@/lib/rental/pricing";
 import type { InventoryItem, RentalRecord } from "@/lib/rental/types";
 
 export type NewInventoryItem = Omit<InventoryItem, "id">;
@@ -190,7 +191,7 @@ export async function createRental(rental: RentalRecord): Promise<RentalRecord> 
       ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
       params: [
         rental.id,
-        typeof item.id === "number" ? item.id : Number(item.id),
+        resolveInventoryItemId(item.id),
         item.name,
         item.qty,
         item.unit,
@@ -224,4 +225,38 @@ export async function returnRental(
   );
 
   return rowToRental(row[0], items);
+}
+
+export async function deleteRental(id: string): Promise<RentalRecord | null> {
+  const row = await d1All<RentalRow>("SELECT * FROM rentals WHERE id = ?", [
+    id,
+  ]);
+  if (!row[0]) return null;
+
+  const items = await d1All<RentalItemRow>(
+    "SELECT * FROM rental_items WHERE rental_id = ? ORDER BY id ASC",
+    [id],
+  );
+
+  await d1Batch([
+    { sql: "DELETE FROM rental_items WHERE rental_id = ?", params: [id] },
+    { sql: "DELETE FROM rentals WHERE id = ?", params: [id] },
+  ]);
+
+  return rowToRental(row[0], items);
+}
+
+export async function deleteAllRentals(): Promise<number> {
+  const countRow = await d1All<{ count: number }>(
+    "SELECT COUNT(*) AS count FROM rentals",
+  );
+  const count = countRow[0]?.count ?? 0;
+  if (count === 0) return 0;
+
+  await d1Batch([
+    { sql: "DELETE FROM rental_items" },
+    { sql: "DELETE FROM rentals" },
+  ]);
+
+  return count;
 }

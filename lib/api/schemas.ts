@@ -138,6 +138,8 @@ export const deleteActivitySchema = z.union([
   z.object({ all: z.literal(true) }),
 ]);
 
+export const deleteAllRentalsSchema = z.object({ all: z.literal(true) });
+
 export const rentalIdSchema = z
   .string()
   .trim()

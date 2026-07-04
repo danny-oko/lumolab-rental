@@ -1,6 +1,17 @@
 import { bySort } from "./constants";
 import type { CartLine, InventoryItem, RentalRecord } from "./types";
 
+/** Cart lines use composite ids (e.g. `5_free`, `3_auto`) for UI keys; DB needs the inventory id. */
+export function resolveInventoryItemId(id: string | number): number {
+  if (typeof id === "number" && Number.isFinite(id)) return id;
+  const raw = String(id);
+  const direct = Number(raw);
+  if (Number.isFinite(direct)) return direct;
+  const parsed = Number(raw.split("_")[0]);
+  if (Number.isFinite(parsed)) return parsed;
+  throw new Error(`Invalid inventory item id: ${id}`);
+}
+
 export function buildOutMap(rentals: RentalRecord[]) {
   const m: Record<number, number> = {};
   rentals

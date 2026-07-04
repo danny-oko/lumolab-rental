@@ -16,6 +16,8 @@ type ActiveRentalsPanelProps = {
   busy?: boolean;
   onFilterChange: (filter: RentalHistoryFilter) => void;
   onReturn: (id: string) => void;
+  onDeleteRental: (id: string) => void;
+  onDeleteAllRentals: () => void;
   onDeleteActivity: (id: number) => void;
   onDeleteAllActivity: () => void;
 };
@@ -35,6 +37,7 @@ function activityActionLabel(entry: ActivityLogEntry) {
   if (entry.kind === "rental") {
     if (entry.action === "checkout") return "Гаргасан";
     if (entry.action === "return") return "Ирүүлсэн";
+    if (entry.action === "delete") return "Устгасан";
   }
   return entry.action;
 }
@@ -51,6 +54,8 @@ export function ActiveRentalsPanel({
   busy = false,
   onFilterChange,
   onReturn,
+  onDeleteRental,
+  onDeleteAllRentals,
   onDeleteActivity,
   onDeleteAllActivity,
 }: ActiveRentalsPanelProps) {
@@ -59,124 +64,6 @@ export function ActiveRentalsPanel({
 
   return (
     <div className="panel-stack">
-      <div className="panel">
-        <div className="panel-head panel-head--wrap">
-          <div>
-            <strong>Түрээсийн түүх</strong>
-            <div className="panel-sub">
-              {rentals.length} бичлэг
-              {activeCount > 0 && (
-                <>
-                  <span className="panel-sub__dot">·</span>
-                  <span className="warn">{activeCount} идэвхтэй</span>
-                </>
-              )}
-            </div>
-          </div>
-          <div className="filter-pills" role="tablist" aria-label="Түрээс шүүлтүүр">
-            {FILTER_OPTIONS.map((opt) => (
-              <button
-                key={opt.id}
-                type="button"
-                role="tab"
-                aria-selected={rentalFilter === opt.id}
-                className={`filter-pill${rentalFilter === opt.id ? " active" : ""}`}
-                onClick={() => onFilterChange(opt.id)}
-              >
-                {opt.label}
-                {opt.id === "out" && activeCount > 0 && (
-                  <span className="filter-pill__count">{activeCount}</span>
-                )}
-                {opt.id === "in" && returnedCount > 0 && (
-                  <span className="filter-pill__count">{returnedCount}</span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {filteredRentals.length === 0 ? (
-          <div className="empty-state empty-state--card">
-            {rentalFilter === "all"
-              ? 'Одоогоор түрээс байхгүй. "Шинэ түрээс" табаас үүсгэнэ үү.'
-              : rentalFilter === "out"
-                ? "Идэвхтэй түрээс байхгүй."
-                : "Буцаасан түрээс байхгүй."}
-          </div>
-        ) : (
-          <div className="table-wrap table-wrap--flush">
-            <table className="table-active">
-              <thead>
-                <tr>
-                  <th className="col-id">#</th>
-                  <th className="col-date">Огноо</th>
-                  <th className="col-cust">Түрээслэгч</th>
-                  <th className="col-items">Бараа</th>
-                  <th className="col-dur">Хугацаа</th>
-                  <th className="col-total num">Төлсөн дүн</th>
-                  <th className="col-status">Төлөв</th>
-                  <th className="col-actions"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredRentals.map((r) => (
-                  <tr key={r.id}>
-                    <td className="col-id mono">{r.id}</td>
-                    <td className="col-date">
-                      {r.date}
-                      {r.returnDate && (
-                        <div className="muted cell-sub">↩ {r.returnDate}</div>
-                      )}
-                    </td>
-                    <td className="col-cust">
-                      <span className="cell-primary">{r.cust.name}</span>
-                      {r.cust.phone && (
-                        <div className="muted cell-sub">{r.cust.phone}</div>
-                      )}
-                    </td>
-                    <td className="col-items">
-                      {r.items.map((i) => `${i.name}×${i.qty}`).join(", ")}
-                    </td>
-                    <td className="col-dur">
-                      {r.durLabel}
-                      <div className="muted cell-sub">{r.modeLabel}</div>
-                    </td>
-                    <td className="col-total num price">{fmt(r.total)}</td>
-                    <td className="col-status">
-                      {r.status === "out" ? (
-                        <span className="chip out">Гарсан</span>
-                      ) : (
-                        <span className="chip in">Ирсэн</span>
-                      )}
-                    </td>
-                    <td className="col-actions">
-                      <div className="actions-row">
-                        <button
-                          type="button"
-                          className="btn sm ghost"
-                          onClick={() => generateContractPdf(r)}
-                        >
-                          PDF
-                        </button>
-                        {r.status === "out" && (
-                          <button
-                            type="button"
-                            className="btn sm warn"
-                            onClick={() => onReturn(r.id)}
-                          >
-                            Ирсэн
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
       <div className="panel">
         <div className="panel-head panel-head--wrap">
           <div>
@@ -243,6 +130,143 @@ export function ActiveRentalsPanel({
                       >
                         Устгах
                       </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <div className="panel">
+        <div className="panel-head panel-head--wrap">
+          <div>
+            <strong>Түрээсийн түүх</strong>
+            <div className="panel-sub">
+              {rentals.length} бичлэг
+              {activeCount > 0 && (
+                <>
+                  <span className="panel-sub__dot">·</span>
+                  <span className="warn">{activeCount} идэвхтэй</span>
+                </>
+              )}
+            </div>
+          </div>
+          <div className="panel-head__actions">
+            <div className="filter-pills" role="tablist" aria-label="Түрээс шүүлтүүр">
+              {FILTER_OPTIONS.map((opt) => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={rentalFilter === opt.id}
+                  className={`filter-pill${rentalFilter === opt.id ? " active" : ""}`}
+                  onClick={() => onFilterChange(opt.id)}
+                >
+                  {opt.label}
+                  {opt.id === "out" && activeCount > 0 && (
+                    <span className="filter-pill__count">{activeCount}</span>
+                  )}
+                  {opt.id === "in" && returnedCount > 0 && (
+                    <span className="filter-pill__count">{returnedCount}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+            {rentals.length > 0 && (
+              <button
+                type="button"
+                className="btn sm danger ghost"
+                disabled={busy}
+                onClick={onDeleteAllRentals}
+              >
+                Бүгдийг устгах
+              </button>
+            )}
+          </div>
+        </div>
+
+        {filteredRentals.length === 0 ? (
+          <div className="empty-state empty-state--card">
+            {rentalFilter === "all"
+              ? 'Одоогоор түрээс байхгүй. "Шинэ түрээс" табаас үүсгэнэ үү.'
+              : rentalFilter === "out"
+                ? "Идэвхтэй түрээс байхгүй."
+                : "Буцаасан түрээс байхгүй."}
+          </div>
+        ) : (
+          <div className="table-wrap table-wrap--flush">
+            <table className="table-active">
+              <thead>
+                <tr>
+                  <th className="col-date">Огноо</th>
+                  <th className="col-cust">Түрээслэгч</th>
+                  <th className="col-items">Бараа</th>
+                  <th className="col-dur">Хугацаа</th>
+                  <th className="col-total num">Төлсөн дүн</th>
+                  <th className="col-status">Төлөв</th>
+                  <th className="col-actions"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredRentals.map((r) => (
+                  <tr key={r.id}>
+                    <td className="col-date">
+                      {r.date}
+                      {r.returnDate && (
+                        <div className="muted cell-sub">↩ {r.returnDate}</div>
+                      )}
+                    </td>
+                    <td className="col-cust">
+                      <span className="cell-primary">{r.cust.name}</span>
+                      {r.cust.phone && (
+                        <div className="muted cell-sub">{r.cust.phone}</div>
+                      )}
+                    </td>
+                    <td className="col-items">
+                      {r.items.map((i) => `${i.name}×${i.qty}`).join(", ")}
+                    </td>
+                    <td className="col-dur">
+                      {r.durLabel}
+                      <div className="muted cell-sub">{r.modeLabel}</div>
+                    </td>
+                    <td className="col-total num price">{fmt(r.total)}</td>
+                    <td className="col-status">
+                      {r.status === "out" ? (
+                        <span className="chip out">Гарсан</span>
+                      ) : (
+                        <span className="chip in">Ирсэн</span>
+                      )}
+                    </td>
+                    <td className="col-actions">
+                      <div className="actions-row">
+                        <button
+                          type="button"
+                          className="btn sm ghost"
+                          onClick={() => generateContractPdf(r)}
+                        >
+                          PDF
+                        </button>
+                        {r.status === "out" && (
+                          <button
+                            type="button"
+                            className="btn sm warn"
+                            onClick={() => onReturn(r.id)}
+                          >
+                            Ирсэн
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          className="btn sm danger ghost"
+                          disabled={busy}
+                          title="Устгах"
+                          onClick={() => onDeleteRental(r.id)}
+                        >
+                          Устгах
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

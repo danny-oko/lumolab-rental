@@ -27,6 +27,13 @@ import type {
   TabId,
   Theme,
 } from "@/lib/rental/types";
+import {
+  readUserSettings,
+  resolveUserSettings,
+  writeUserSettings,
+} from "@/lib/rental/user-settings";
+import { useConfirmDialog } from "@/components/rental/use-confirm-dialog";
+import { useAlertDialog } from "@/components/rental/use-alert-dialog";
 
 async function apiJson<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, {
@@ -100,6 +107,18 @@ function clampCart(
 }
 
 export function useRentalApp() {
+  const { confirm, confirmState } = useConfirmDialog();
+  const { showAlert, alertState } = useAlertDialog();
+
+  const showError = useCallback(
+    (err: unknown) =>
+      showAlert({
+        danger: true,
+        message: err instanceof Error ? err.message : String(err),
+      }),
+    [showAlert],
+  );
+
   const [tab, setTab] = useState<TabId>("inv");
   const [inv, setInv] = useState<InventoryItem[]>([]);
   const [cart, setCart] = useState<Record<number, number>>({});
@@ -125,6 +144,21 @@ export function useRentalApp() {
   const invSavingRef = useRef(false);
   const busyRef = useRef(busy);
   const syncingRef = useRef(false);
+  const settingsHydratedRef = useRef(false);
+
+  useEffect(() => {
+    const settings = resolveUserSettings(readUserSettings());
+    setTheme(settings.theme);
+    setPriceMode(settings.priceMode);
+    setCatFilter(settings.catFilter);
+    setRentalFilter(settings.rentalFilter);
+    settingsHydratedRef.current = true;
+  }, []);
+
+  useEffect(() => {
+    if (!settingsHydratedRef.current) return;
+    writeUserSettings({ theme, priceMode, catFilter, rentalFilter });
+  }, [theme, priceMode, catFilter, rentalFilter]);
 
   useEffect(() => {
     invRef.current = inv;
@@ -344,9 +378,7 @@ export function useRentalApp() {
     } catch (err) {
       setInvSaveState("error");
       void loadData();
-      alert(
-        "Алдаа гарлаа: " + (err instanceof Error ? err.message : String(err)),
-      );
+      void showError(err);
       console.error(err);
     } finally {
       invSavingRef.current = false;
@@ -431,7 +463,7 @@ export function useRentalApp() {
       await refreshActivity();
       return created;
     } catch (err) {
-      alert("Алдаа гарлаа: " + (err instanceof Error ? err.message : String(err)));
+      void showError(err);
       console.error(err);
       throw err;
     } finally {
@@ -445,16 +477,19 @@ export function useRentalApp() {
 
     const outQty = outMap[id] || 0;
     if (outQty > 0) {
-      alert(
+      void showAlert(
         `Идэвхтэй түрээст ${outQty} ширхэг байна. Эхлээд ирүүлнэ үү.`,
       );
       return;
     }
 
     if (
-      !confirm(
-        `"${item.name}" устгах уу?\n\nЭнэ үйлдлийг буцаах боломжгүй.`,
-      )
+      !(await confirm({
+        title: "Бараа устгах",
+        message: `"${item.name}" устгах уу?\n\nЭнэ үйлдлийг буцаах боломжгүй.`,
+        confirmLabel: "Устгах",
+        danger: true,
+      }))
     ) {
       return;
     }
@@ -481,7 +516,7 @@ export function useRentalApp() {
       });
       await refreshActivity();
     } catch (err) {
-      alert("Алдаа гарлаа: " + (err instanceof Error ? err.message : String(err)));
+      void showError(err);
       console.error(err);
     } finally {
       setBusy(false);
@@ -489,7 +524,16 @@ export function useRentalApp() {
   }
 
   async function deleteActivityLog(id: number) {
-    if (!confirm("Энэ бүртгэлийг устгах уу?")) return;
+    if (
+      !(await confirm({
+        title: "Бүртгэл устгах",
+        message: "Энэ бүртгэлийг устгах уу?",
+        confirmLabel: "Устгах",
+        danger: true,
+      }))
+    ) {
+      return;
+    }
 
     try {
       setBusy(true);
@@ -499,7 +543,7 @@ export function useRentalApp() {
       });
       await refreshActivity();
     } catch (err) {
-      alert("Алдаа гарлаа: " + (err instanceof Error ? err.message : String(err)));
+      void showError(err);
       console.error(err);
     } finally {
       setBusy(false);
@@ -521,9 +565,12 @@ export function useRentalApp() {
     }
 
     if (
-      !confirm(
-        `${total} бүртгэлийг бүгдийг нь устгах уу?\n\nЭнэ үйлдлийг буцаах боломжгүй.`,
-      )
+      !(await confirm({
+        title: "Бүгдийг устгах",
+        message: `${total} бүртгэлийг бүгдийг нь устгах уу?\n\nЭнэ үйлдлийг буцаах боломжгүй.`,
+        confirmLabel: "Устгах",
+        danger: true,
+      }))
     ) {
       return;
     }
@@ -536,7 +583,7 @@ export function useRentalApp() {
       });
       await refreshActivity();
     } catch (err) {
-      alert("Алдаа гарлаа: " + (err instanceof Error ? err.message : String(err)));
+      void showError(err);
       console.error(err);
     } finally {
       setBusy(false);
@@ -546,17 +593,19 @@ export function useRentalApp() {
   async function checkout() {
     try {
       if (lines.length === 0) {
-        alert("Эхлээд бараа сонгоно уу.");
+        void showAlert("Эхлээд бараа сонгоно уу.");
         return;
       }
       if (!cust.name || !cust.name.trim()) {
-        alert("Түрээслэгчийн нэрийг бөглөнө үү.");
+        void showAlert("Түрээслэгчийн нэрийг бөглөнө үү.");
         return;
       }
       if (freeShort > 0) {
-        const ok = confirm(
-          `Анхаар: ${freeShort} үнэгүй стенд бэлэн байхгүй тул дагалдуулж чадсангүй (Combo stand үнэгүй биш). Үргэлжлүүлэх үү?`,
-        );
+        const ok = await confirm({
+          title: "Анхаар",
+          message: `${freeShort} үнэгүй стенд бэлэн байхгүй тул дагалдуулж чадсангүй (Combo stand үнэгүй биш). Үргэлжлүүлэх үү?`,
+          confirmLabel: "Үргэлжлүүлэх",
+        });
         if (!ok) return;
       }
 
@@ -597,7 +646,7 @@ export function useRentalApp() {
       setTab("active");
       await refreshActivity();
     } catch (err) {
-      alert("Алдаа гарлаа: " + (err instanceof Error ? err.message : String(err)));
+      void showError(err);
       console.error(err);
     } finally {
       setBusy(false);
@@ -613,7 +662,78 @@ export function useRentalApp() {
       setRentals((rs) => rs.map((r) => (r.id === rid ? updated : r)));
       await refreshActivity();
     } catch (err) {
-      alert("Алдаа гарлаа: " + (err instanceof Error ? err.message : String(err)));
+      void showError(err);
+      console.error(err);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function deleteRentalRecord(rid: string) {
+    const rental = rentals.find((r) => r.id === rid);
+    if (!rental) return;
+
+    const message =
+      rental.status === "out"
+        ? `Идэвхтэй түрээс (${rental.cust.name}) устгах уу?\n\nБараа түрээслэгдсэн төлөвөөс гарах болно.`
+        : `"${rental.cust.name}" түрээсийн бичлэгийг устгах уу?\n\nЭнэ үйлдлийг буцаах боломжгүй.`;
+
+    if (
+      !(await confirm({
+        title: "Түрээс устгах",
+        message,
+        confirmLabel: "Устгах",
+        danger: true,
+      }))
+    ) {
+      return;
+    }
+
+    try {
+      setBusy(true);
+      await apiJson<{ ok: boolean }>(`/api/rentals/${rid}`, {
+        method: "DELETE",
+      });
+      setRentals((rs) => rs.filter((r) => r.id !== rid));
+      await refreshActivity();
+    } catch (err) {
+      void showError(err);
+      console.error(err);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function deleteAllRentals() {
+    if (rentals.length === 0) return;
+
+    const activeCount = rentals.filter((r) => r.status === "out").length;
+    const activeNote =
+      activeCount > 0
+        ? `\n\n${activeCount} идэвхтэй түрээс байна — бараа түрээслэгдсэн төлөвөөс гарах болно.`
+        : "";
+
+    if (
+      !(await confirm({
+        title: "Бүгдийг устгах",
+        message: `${rentals.length} түрээсийн бичлэгийг бүгдийг нь устгах уу?\n\nЭнэ үйлдлийг буцаах боломжгүй.${activeNote}`,
+        confirmLabel: "Устгах",
+        danger: true,
+      }))
+    ) {
+      return;
+    }
+
+    try {
+      setBusy(true);
+      await apiJson<{ ok: boolean; deleted: number }>("/api/rentals", {
+        method: "DELETE",
+        body: JSON.stringify({ all: true }),
+      });
+      setRentals([]);
+      await refreshActivity();
+    } catch (err) {
+      void showError(err);
       console.error(err);
     } finally {
       setBusy(false);
@@ -689,6 +809,8 @@ export function useRentalApp() {
     setQty,
     checkout,
     returnRental,
+    deleteRental: deleteRentalRecord,
+    deleteAllRentals,
     editStock,
     saveAllInvChanges,
     discardAllInvChanges,
@@ -698,6 +820,9 @@ export function useRentalApp() {
     deleteItem,
     deleteActivityLog,
     deleteAllActivityLogs,
+    confirmState,
+    alertState,
+    showAlert,
   };
 }
 

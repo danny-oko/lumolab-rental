@@ -80,8 +80,28 @@ const ICON_PATHS: Record<Category, ReactNode> = {
   ),
 };
 
-export const CatIcon = ({ cat, size = 22 }: { cat: Category; size?: number }) => (
-  <Ico size={size} d={ICON_PATHS[cat] || ICON_PATHS["БУСАД"]} />
+const CAT_ICON_CLASS: Record<Category, string> = {
+  ГЭРЭЛ: "cat-icon--gerel",
+  FIXTURE: "cat-icon--fixture",
+  СТЕНД: "cat-icon--stand",
+  БАТТЕРЭЙ: "cat-icon--battery",
+  БУСАД: "cat-icon--other",
+};
+
+export const CatIcon = ({
+  cat,
+  size = 22,
+  className,
+}: {
+  cat: Category;
+  size?: number;
+  className?: string;
+}) => (
+  <span
+    className={["cat-icon", CAT_ICON_CLASS[cat], className].filter(Boolean).join(" ")}
+  >
+    <Ico size={size} d={ICON_PATHS[cat] || ICON_PATHS["БУСАД"]} />
+  </span>
 );
 
 export const LumoMark = ({ size = 30 }: { size?: number }) => (

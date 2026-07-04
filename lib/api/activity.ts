@@ -60,6 +60,16 @@ export async function logRentalReturn(rental: RentalRecord) {
   });
 }
 
+export async function logRentalDelete(rental: RentalRecord) {
+  await insertActivityLog({
+    kind: "rental",
+    action: "delete",
+    entityId: rental.id,
+    summary: `Устгасан: ${rental.cust.name}`,
+    detail: `${rental.items.length} бараа · ${fmtTotal(rental.total)}`,
+  });
+}
+
 function fmtTotal(n: number) {
   return `₮${n.toLocaleString("mn-MN")}`;
 }

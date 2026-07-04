@@ -1,23 +1,28 @@
 :root {
-  --bg: #0e1116;
-  --panel: #161b22;
-  --panel2: #1c2330;
-  --line: #2a3343;
-  --ink: #e6edf3;
-  --mut: #8b97a8;
-  --acc: #7cff4f;
-  --acc-d: #5ed433;
+  --bg: #100c0e;
+  --panel: #181318;
+  --panel2: #201820;
+  --line: #322830;
+  --ink: #ede6e9;
+  --mut: #9a8d93;
+  --acc: #ee2a59;
+  --acc-d: #c91f47;
   --warn: #ffb84d;
-  --out: #ff6b6b;
+  --out: #ee2a59;
   --in: #3fb950;
-  --acc-ink: #04210a;
+  --acc-ink: #ffffff;
   --chip-in-bg: #16331a;
-  --chip-out-bg: #3a1b1b;
-  --chip-zero-bg: #2a2f3a;
-  --input-bg: #1c2330;
-  --row-hover: #1a212d;
-  --row-line: #1b2230;
-  --th-fill: #23303f;
+  --chip-out-bg: #3a1824;
+  --chip-zero-bg: #2a2228;
+  --input-bg: #201820;
+  --row-hover: #241c22;
+  --row-line: #221a20;
+  --th-fill: #2a2028;
+  --icon-gerel: #ffc857;
+  --icon-fixture: #ee2a59;
+  --icon-stand: #6eb5ff;
+  --icon-battery: #5dd879;
+  --icon-other: #c49ec4;
   --radius: 12px;
   --radius-sm: 8px;
   --space-1: 4px;
@@ -31,25 +36,30 @@
 }
 
 [data-theme="light"] {
-  --bg: #f6f7f9;
+  --bg: #faf6f7;
   --panel: #ffffff;
-  --panel2: #f0f2f5;
-  --line: #d8dee6;
-  --ink: #1a2230;
-  --mut: #5d6b7e;
-  --acc: #3fae22;
-  --acc-d: #2f8c19;
+  --panel2: #f5eff2;
+  --line: #e8dde2;
+  --ink: #1a1216;
+  --mut: #6d5d64;
+  --acc: #ee2a59;
+  --acc-d: #c91f47;
   --warn: #c8851b;
-  --out: #d83a3a;
+  --out: #ee2a59;
   --in: #2f8c19;
   --acc-ink: #ffffff;
   --chip-in-bg: #dcf3df;
-  --chip-out-bg: #fae0e0;
-  --chip-zero-bg: #e7ebf0;
+  --chip-out-bg: #fde8ef;
+  --chip-zero-bg: #ece6e9;
   --input-bg: #ffffff;
-  --row-hover: #f3f5f8;
-  --row-line: #eaedf1;
-  --th-fill: #e7ebf0;
+  --row-hover: #f7f0f3;
+  --row-line: #efe6ea;
+  --th-fill: #ece6e9;
+  --icon-gerel: #c88400;
+  --icon-fixture: #ee2a59;
+  --icon-stand: #2d7ec7;
+  --icon-battery: #2a9d4e;
+  --icon-other: #8b6b8a;
 }
 
 *,
@@ -538,7 +548,6 @@ body {
 
 .lumo-app .inv-name-edit__icon {
   flex-shrink: 0;
-  color: var(--acc);
   display: flex;
   margin-top: 6px;
 }
@@ -672,10 +681,6 @@ body {
 .lumo-app .table-active td {
   padding: 10px 12px;
   vertical-align: top;
-}
-
-.lumo-app .table-active .col-id {
-  width: 92px;
 }
 
 .lumo-app .table-active .col-date {
@@ -904,8 +909,32 @@ body {
 
 .lumo-app .item-name__icon {
   flex-shrink: 0;
-  color: var(--acc);
   display: flex;
+}
+
+.lumo-app .cat-icon {
+  display: inline-flex;
+  line-height: 0;
+}
+
+.lumo-app .cat-icon--gerel {
+  color: var(--icon-gerel);
+}
+
+.lumo-app .cat-icon--fixture {
+  color: var(--icon-fixture);
+}
+
+.lumo-app .cat-icon--stand {
+  color: var(--icon-stand);
+}
+
+.lumo-app .cat-icon--battery {
+  color: var(--icon-battery);
+}
+
+.lumo-app .cat-icon--other {
+  color: var(--icon-other);
 }
 
 .lumo-app .item-name__text {
@@ -1619,4 +1648,61 @@ body {
     width: 100%;
     justify-content: space-between;
   }
+}
+
+/* ── Confirm dialog ── */
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  background: color-mix(in srgb, var(--bg) 55%, transparent);
+  backdrop-filter: blur(4px);
+}
+
+.dialog {
+  width: min(100%, 400px);
+  padding: var(--space-6);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 16px 48px color-mix(in srgb, var(--bg) 70%, transparent);
+}
+
+.dialog__title {
+  display: block;
+  font-size: 15px;
+  margin-bottom: var(--space-3);
+}
+
+.dialog__message {
+  margin: 0 0 var(--space-5);
+  color: var(--mut);
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.dialog__title--danger {
+  color: var(--out);
+}
+
+.dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.dialog .btn.danger {
+  background: var(--out);
+  color: #fff;
+  border: none;
+}
+
+.dialog .btn.danger:hover:not(:disabled) {
+  background: var(--out);
+  color: #fff;
 }

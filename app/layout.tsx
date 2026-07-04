@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { getThemeInitScript } from "@/lib/rental/user-settings";
 import "./globals.css";
 import "./lumo-lab.css";
 
@@ -24,6 +25,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="mn" data-theme="dark" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: getThemeInitScript() }} />
+      </head>
       <body className={inter.className}>{children}</body>
     </html>
   );
