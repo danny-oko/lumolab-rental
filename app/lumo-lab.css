@@ -420,8 +420,13 @@ body {
 
 .lumo-app .table-inv {
   width: 100%;
-  min-width: 920px;
+  min-width: 860px;
   table-layout: fixed;
+}
+
+.lumo-app .table-inv th,
+.lumo-app .table-inv td {
+  padding: 8px 8px;
 }
 
 .lumo-app .table-inv .col-inv-name {
@@ -519,9 +524,11 @@ body {
   max-width: 100%;
   min-width: 0;
   field-sizing: fixed;
-  padding: 6px 26px 6px 8px;
+  padding: 0 20px 0 6px !important;
   font-size: 11px;
   font-weight: 600;
+  height: 28px;
+  min-height: 28px;
   appearance: none;
   -webkit-appearance: none;
   background-color: var(--input-bg);
@@ -648,18 +655,18 @@ body {
 }
 
 .lumo-app .cat-select--compact .cat-select__add-btn {
-  width: 32px;
-  min-width: 32px;
-  height: 32px;
-  min-height: 32px;
-  font-size: 17px;
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  min-height: 28px;
+  font-size: 15px;
 }
 
 .lumo-app .cat-select--compact .cat-select__input {
-  height: 32px;
-  min-height: 32px;
-  font-size: 12px;
-  padding: 0 24px 0 8px;
+  height: 28px;
+  min-height: 28px;
+  font-size: 11px;
+  padding: 0 20px 0 6px;
 }
 
 .lumo-app .cat-select__overlay {
@@ -801,15 +808,9 @@ body {
 
 .lumo-app .inv-name-edit {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
   min-width: 0;
-}
-
-.lumo-app .inv-name-edit__icon {
-  flex-shrink: 0;
-  display: flex;
-  margin-top: 6px;
 }
 
 .lumo-app .inv-name-edit__body {
@@ -817,10 +818,49 @@ body {
   min-width: 0;
 }
 
+.lumo-app .inv-icon-input {
+  box-sizing: border-box;
+  flex-shrink: 0;
+  width: 28px !important;
+  max-width: 28px !important;
+  min-width: 28px !important;
+  height: 28px;
+  padding: 0 !important;
+  font-size: 16px;
+  line-height: 28px;
+  text-align: center;
+  background: var(--input-bg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+  font-family: inherit;
+}
+
+.lumo-app .inv-icon-input:focus {
+  outline: none;
+  border-color: var(--acc);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--acc) 18%, transparent);
+}
+
+.lumo-app .item-emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  font-size: 20px;
+}
+
+.lumo-app .inv-add-form__field--icon .inv-icon-input {
+  width: 100%;
+  height: 36px;
+}
+
 .lumo-app .inv-name-input {
   width: 100%;
-  padding: 6px 8px !important;
-  font-size: 13px;
+  height: 28px;
+  padding: 0 6px !important;
+  font-size: 12px;
+  line-height: 1.2;
 }
 
 .lumo-app .inv-view-text {
@@ -839,6 +879,72 @@ body {
 
 .lumo-app .table-inv .inv-row--editing td {
   vertical-align: middle;
+}
+
+/* Compact inventory edit table */
+.lumo-app .table-inv--editing th,
+.lumo-app .table-inv--editing td {
+  padding: 5px 6px;
+}
+
+.lumo-app .table-inv--editing th {
+  padding: 6px 8px;
+  font-size: 10px;
+}
+
+.lumo-app .table-inv--editing .inv-name-edit {
+  gap: 5px;
+}
+
+.lumo-app .table-inv--editing .inv-flag-select {
+  height: 28px;
+  min-height: 28px;
+  padding: 0 20px 0 6px !important;
+  font-size: 11px;
+}
+
+.lumo-app .table-inv--editing .cat-select--compact .cat-select__input {
+  height: 28px;
+  min-height: 28px;
+  font-size: 11px;
+  padding: 0 20px 0 6px;
+}
+
+.lumo-app .table-inv--editing .cat-select--compact .cat-select__add-btn {
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  min-height: 28px;
+  font-size: 15px;
+}
+
+.lumo-app .table-inv--editing .inv-num-input {
+  height: 28px;
+  padding: 0 4px !important;
+  font-size: 12px;
+}
+
+.lumo-app .table-inv--editing .input-sm {
+  width: 42px !important;
+}
+
+.lumo-app .table-inv--editing .input-md {
+  width: 68px !important;
+}
+
+.lumo-app .table-inv--editing .col-center .inv-num-input {
+  height: 28px;
+  line-height: 28px;
+}
+
+.lumo-app .table-inv--editing .col-inv-actions .btn {
+  padding: 3px 8px !important;
+  font-size: 11px;
+}
+
+.lumo-app .table-inv--editing .chip {
+  padding: 2px 6px;
+  font-size: 10px;
 }
 
 .lumo-app .inv-save-all-btn {
@@ -1105,9 +1211,9 @@ body {
   display: block;
   margin-inline: auto;
   text-align: center !important;
-  height: 32px;
-  padding: 0 6px !important;
-  line-height: 32px;
+  height: 28px;
+  padding: 0 4px !important;
+  line-height: 28px;
   box-sizing: border-box;
   -moz-appearance: textfield;
   appearance: textfield;
@@ -1123,8 +1229,8 @@ body {
 .lumo-app .col-center .ok,
 .lumo-app .col-center .danger {
   display: inline-block;
-  min-width: 32px;
-  line-height: 32px;
+  min-width: 28px;
+  line-height: 28px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
@@ -2013,4 +2119,3 @@ body {
 .inv-row--draggable .col-inv-drag .drag-handle {
   margin-right: 0;
 }
-

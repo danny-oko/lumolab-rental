@@ -1,15 +1,18 @@
 "use client";
 
-import { CategoryFilter, CategoryLabel } from "@/components/rental/category-filter";
+import {
+  CategoryFilter,
+  CategoryLabel,
+} from "@/components/rental/category-filter";
 import { CategorySelect } from "@/components/rental/category-select";
-import { CatIcon } from "@/components/rental/icons";
+import { InvIconInput } from "@/components/rental/inv-icon-input";
 import { InvFlagSelect } from "@/components/rental/inv-flag-select";
 import { InvNumInput } from "@/components/rental/inv-num-input";
 import { InventoryAddForm } from "@/components/rental/inventory-add-form";
 import { ItemNameCell } from "@/components/rental/item-name-cell";
+import type { AlertOptions } from "@/components/rental/use-alert-dialog";
 import { useDragReorder } from "@/components/rental/use-drag-reorder";
 import type { InventorySyncState } from "@/components/rental/use-rental-app";
-import type { AlertOptions } from "@/components/rental/use-alert-dialog";
 import type { CategoryDef, NewCategoryInput } from "@/lib/rental/categories";
 import {
   getInvFlagMode,
@@ -38,7 +41,9 @@ type InventoryPanelProps = {
   onSaveAll: () => void;
   onDiscardAll: () => void;
   onEditFlagMode: (id: number, mode: InvFlagMode) => void;
-  onAddItem: (item: Omit<InventoryItem, "id" | "sortOrder">) => Promise<unknown>;
+  onAddItem: (
+    item: Omit<InventoryItem, "id" | "sortOrder">,
+  ) => Promise<unknown>;
   onAddCategory: (def: NewCategoryInput) => void | Promise<void>;
   onDeleteItem: (id: number) => void;
   onReorderInventory?: (items: InventoryItem[]) => void | Promise<void>;
@@ -160,10 +165,19 @@ export function InventoryPanel({
       />
 
       <div className="table-wrap">
-        <table className="tbl-fixed table-inv">
+        <table
+          className={[
+            "tbl-fixed table-inv",
+            invEditing ? "table-inv--editing" : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
           <thead>
             <tr>
-              {canReorder && <th className="col-inv-drag" aria-label="Эрэмбэ" />}
+              {canReorder && (
+                <th className="col-inv-drag" aria-label="Эрэмбэ" />
+              )}
               <th className="col-inv-name">Нэр</th>
               <th className="col-inv-cat col-cat">Төрөл</th>
               <th className="col-inv-flag">Тэмдэглэл</th>
@@ -185,17 +199,23 @@ export function InventoryPanel({
               return (
                 <tr
                   key={i.id}
-                  className={[
-                    invEditing ? "inv-row--editing" : "",
-                    canReorder ? "inv-row--draggable" : "",
-                  ]
-                    .filter(Boolean)
-                    .join(" ") || undefined}
+                  className={
+                    [
+                      invEditing ? "inv-row--editing" : "",
+                      canReorder ? "inv-row--draggable" : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ") || undefined
+                  }
                   {...dragProps}
                 >
                   {canReorder && (
                     <td className="col-inv-drag">
-                      <span className="drag-handle" title="Чирж эрэмбэлэх" aria-hidden>
+                      <span
+                        className="drag-handle"
+                        title="Чирж эрэмбэлэх"
+                        aria-hidden
+                      >
                         ⋮⋮
                       </span>
                     </td>
@@ -203,9 +223,10 @@ export function InventoryPanel({
                   <td className="col-inv-name">
                     {invEditing ? (
                       <div className="inv-name-edit">
-                        <span className="inv-name-edit__icon">
-                          <CatIcon cat={i.cat} size={22} />
-                        </span>
+                        <InvIconInput
+                          value={i.icon}
+                          onChange={(icon) => onEditStock(i.id, "icon", icon)}
+                        />
                         <div className="inv-name-edit__body">
                           <input
                             type="text"

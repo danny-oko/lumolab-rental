@@ -5,6 +5,7 @@ import { CategorySelect } from "@/components/rental/category-select";
 import { CategoryAddPanel } from "@/components/rental/category-add-panel";
 import { InvFlagSelect } from "@/components/rental/inv-flag-select";
 import { InvNumInput } from "@/components/rental/inv-num-input";
+import { InvIconInput } from "@/components/rental/inv-icon-input";
 import type { AlertOptions } from "@/components/rental/use-alert-dialog";
 import type { CategoryDef, NewCategoryInput } from "@/lib/rental/categories";
 import {
@@ -18,6 +19,7 @@ export type NewInventoryInput = Omit<InventoryItem, "id" | "sortOrder">;
 const emptyItem = (): NewInventoryInput => ({
   name: "",
   cat: "ГЭРЭЛ",
+  icon: "💡",
   qty: 1,
   price: 0,
 });
@@ -60,6 +62,13 @@ export function InventoryAddForm({
   return (
     <form className="inv-add-form" onSubmit={(e) => void handleSubmit(e)}>
       <div className="inv-add-form__grid">
+        <label className="inv-add-form__field inv-add-form__field--icon">
+          <span>Дүрс</span>
+          <InvIconInput
+            value={draft.icon}
+            onChange={(icon) => setDraft((d) => ({ ...d, icon }))}
+          />
+        </label>
         <label className="inv-add-form__field inv-add-form__field--name">
           <span>Нэр</span>
           <input

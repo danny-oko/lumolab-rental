@@ -1,7 +1,4 @@
-import {
-  INV_FLAG_OPTIONS,
-  type InvFlagMode,
-} from "@/lib/rental/inv-flags";
+import { INV_FLAG_OPTIONS, type InvFlagMode } from "@/lib/rental/inv-flags";
 
 type InvFlagSelectProps = {
   value: InvFlagMode;

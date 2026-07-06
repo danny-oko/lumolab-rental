@@ -7,6 +7,7 @@ export interface InventoryItem {
   price: number;
   cat: Category;
   sortOrder: number;
+  icon: string;
   noStand?: boolean;
   noFree?: boolean;
   isStand?: boolean;

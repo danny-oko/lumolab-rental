@@ -1,5 +1,10 @@
 import type { CategoryDef } from "@/lib/rental/categories";
-import type { Category, Customer, InventoryItem, RentalRecord } from "@/lib/rental/types";
+import type {
+  Category,
+  Customer,
+  InventoryItem,
+  RentalRecord,
+} from "@/lib/rental/types";
 
 export type InventoryRow = {
   id: number;
@@ -8,6 +13,7 @@ export type InventoryRow = {
   price: number;
   cat: string;
   sort_order: number;
+  icon: string;
   no_stand: number;
   no_free: number;
   is_stand: number;
@@ -60,6 +66,7 @@ export function rowToInventory(row: InventoryRow): InventoryItem {
     price: row.price,
     cat: row.cat as Category,
     sortOrder: row.sort_order,
+    icon: row.icon || "📦",
     ...(row.no_stand ? { noStand: true } : {}),
     ...(row.no_free ? { noFree: true } : {}),
     ...(row.is_stand ? { isStand: true } : {}),

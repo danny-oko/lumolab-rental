@@ -35,7 +35,9 @@ export const createRentalSchema = z.object({
   durLabel: z.string().trim().min(1),
   priceMode: z.enum(["base", "vat"]),
   modeLabel: z.string().trim().min(1),
-  items: z.array(rentalItemSchema).min(1, "At least one rental item is required"),
+  items: z
+    .array(rentalItemSchema)
+    .min(1, "At least one rental item is required"),
   gross: z.number(),
   discount: z.number().nonnegative(),
   base: z.number().nonnegative(),
@@ -49,6 +51,7 @@ export const inventoryFieldSchema = z.enum([
   "qty",
   "price",
   "cat",
+  "icon",
   "noStand",
   "noFree",
   "isStand",
@@ -59,6 +62,7 @@ export const createInventorySchema = z.object({
   qty: z.number().int().nonnegative(),
   price: z.number().nonnegative(),
   cat: categorySchema,
+  icon: z.string().trim().min(1).max(8).optional(),
   noStand: z.boolean().optional(),
   noFree: z.boolean().optional(),
   isStand: z.boolean().optional(),
@@ -84,6 +88,13 @@ const patchInventoryFieldSchema = z
       ctx.addIssue({
         code: "custom",
         message: "cat must be a string",
+        path: ["value"],
+      });
+    }
+    if (body.field === "icon" && typeof body.value !== "string") {
+      ctx.addIssue({
+        code: "custom",
+        message: "icon must be a string",
         path: ["value"],
       });
     }

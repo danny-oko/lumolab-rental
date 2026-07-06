@@ -1,4 +1,4 @@
-import { CatIcon } from "@/components/rental/icons";
+import { ItemEmoji } from "@/components/rental/inv-icon-input";
 import type { InventoryItem } from "@/lib/rental/types";
 
 type ItemNameCellProps = {
@@ -10,7 +10,7 @@ export function ItemNameCell({ item, variant }: ItemNameCellProps) {
   return (
     <span className="item-name">
       <span className="item-name__icon">
-        <CatIcon cat={item.cat} size={26} />
+        <ItemEmoji icon={item.icon} size={26} />
       </span>
       <span className="item-name__text">{item.name}</span>
       {variant === "inventory" && item.isStand && item.noFree && (

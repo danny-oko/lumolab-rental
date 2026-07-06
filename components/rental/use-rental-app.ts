@@ -1,17 +1,23 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { VAT } from "@/lib/rental/constants";
+import { useAlertDialog } from "@/components/rental/use-alert-dialog";
+import { useConfirmDialog } from "@/components/rental/use-confirm-dialog";
 import {
+  clearLegacyCustomCategories,
   compareInventoryItems,
   DEFAULT_CATEGORIES,
   mergeCategories,
-  readLegacyCustomCategories,
-  clearLegacyCustomCategories,
-  type CategoryDef,
   NewCategoryInput,
+  readLegacyCustomCategories,
+  type CategoryDef,
 } from "@/lib/rental/categories";
+import { VAT } from "@/lib/rental/constants";
 import { emptyCustomer } from "@/lib/rental/empty-customer";
+import {
+  applyFlagMode,
+  getInvFlagMode,
+  type InvFlagMode,
+} from "@/lib/rental/inv-flags";
 import {
   buildCartLines,
   buildOutMap,
@@ -20,11 +26,6 @@ import {
   calcFreeShort,
   calcTotals,
 } from "@/lib/rental/pricing";
-import {
-  applyFlagMode,
-  getInvFlagMode,
-  type InvFlagMode,
-} from "@/lib/rental/inv-flags";
 import type {
   Category,
   Customer,
@@ -40,8 +41,7 @@ import {
   resolveUserSettings,
   writeUserSettings,
 } from "@/lib/rental/user-settings";
-import { useConfirmDialog } from "@/components/rental/use-confirm-dialog";
-import { useAlertDialog } from "@/components/rental/use-alert-dialog";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 async function apiJson<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, {
@@ -59,7 +59,7 @@ async function apiJson<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export type InventorySyncState = "idle" | "saving" | "saved" | "error";
-type InvEditableField = "name" | "cat" | "qty" | "price" | "flag";
+type InvEditableField = "name" | "cat" | "qty" | "price" | "icon" | "flag";
 
 const SAVED_MS = 2000;
 const SYNC_INTERVAL_MS = 5000;
@@ -77,6 +77,7 @@ function getDirtyFields(
   if (item.cat !== saved.cat) fields.push("cat");
   if (item.qty !== saved.qty) fields.push("qty");
   if (item.price !== saved.price) fields.push("price");
+  if (item.icon !== saved.icon) fields.push("icon");
   if (getInvFlagMode(item) !== getInvFlagMode(saved)) fields.push("flag");
   return fields;
 }
@@ -96,7 +97,9 @@ function mergeInventory(
 ): InventoryItem[] {
   const localById = new Map(local.map((i) => [i.id, i]));
   return server
-    .map((item) => (pendingIds.has(item.id) ? (localById.get(item.id) ?? item) : item))
+    .map((item) =>
+      pendingIds.has(item.id) ? (localById.get(item.id) ?? item) : item,
+    )
     .sort((a, b) => inventorySort(a, b));
 }
 
@@ -365,8 +368,14 @@ export function useRentalApp() {
 
   const freeShort = calcFreeShort(lines, freeEntitlement);
 
-  const { grossDur, discountAmt, base, addVat, vatAmt, charged: subtotal } =
-    calcTotals(lines, durMult, longDiscount, priceMode, VAT);
+  const {
+    grossDur,
+    discountAmt,
+    base,
+    addVat,
+    vatAmt,
+    charged: subtotal,
+  } = calcTotals(lines, durMult, longDiscount, priceMode, VAT);
   const employeeDiscountAmt = employeeDiscount ? subtotal * 0.5 : 0;
   const charged = subtotal - employeeDiscountAmt;
 
@@ -408,7 +417,10 @@ export function useRentalApp() {
             field === "flag"
               ? await apiJson<InventoryItem>("/api/inventory", {
                   method: "PATCH",
-                  body: JSON.stringify({ id, flagMode: getInvFlagMode(latest) }),
+                  body: JSON.stringify({
+                    id,
+                    flagMode: getInvFlagMode(latest),
+                  }),
                 })
               : await apiJson<InventoryItem>("/api/inventory", {
                   method: "PATCH",
@@ -466,8 +478,12 @@ export function useRentalApp() {
     field: keyof InventoryItem,
     val: string | number | boolean,
   ) {
-    const strFields: (keyof InventoryItem)[] = ["name", "cat"];
-    const boolFields: (keyof InventoryItem)[] = ["noStand", "noFree", "isStand"];
+    const strFields: (keyof InventoryItem)[] = ["name", "cat", "icon"];
+    const boolFields: (keyof InventoryItem)[] = [
+      "noStand",
+      "noFree",
+      "isStand",
+    ];
     const nextVal = boolFields.includes(field)
       ? !!val
       : strFields.includes(field)
@@ -489,9 +505,7 @@ export function useRentalApp() {
   }
 
   function editFlagMode(id: number, mode: InvFlagMode) {
-    setInv((iv) =>
-      iv.map((i) => (i.id === id ? applyFlagMode(i, mode) : i)),
-    );
+    setInv((iv) => iv.map((i) => (i.id === id ? applyFlagMode(i, mode) : i)));
   }
 
   async function addItem(item: Omit<InventoryItem, "id" | "sortOrder">) {
@@ -634,9 +648,12 @@ export function useRentalApp() {
   async function returnRental(rid: string) {
     try {
       setBusy(true);
-      const updated = await apiJson<RentalRecord>(`/api/rentals/${rid}/return`, {
-        method: "POST",
-      });
+      const updated = await apiJson<RentalRecord>(
+        `/api/rentals/${rid}/return`,
+        {
+          method: "POST",
+        },
+      );
       setRentals((rs) => rs.map((r) => (r.id === rid ? updated : r)));
     } catch (err) {
       void showError(err);
@@ -729,10 +746,12 @@ export function useRentalApp() {
 
       reorderingRef.current = true;
       const previous = storedCategories;
-      const optimistic = order.map((name, index) => {
-        const cat = allCategories.find((c) => c.name === name);
-        return cat ? { ...cat, sortOrder: index } : null;
-      }).filter((c): c is CategoryDef => c !== null);
+      const optimistic = order
+        .map((name, index) => {
+          const cat = allCategories.find((c) => c.name === name);
+          return cat ? { ...cat, sortOrder: index } : null;
+        })
+        .filter((c): c is CategoryDef => c !== null);
       setStoredCategories(
         optimistic.filter((c) => previous.some((p) => p.name === c.name)),
       );
@@ -782,10 +801,12 @@ export function useRentalApp() {
 
       reorderingRef.current = true;
       const previous = invRef.current;
-      const optimistic = order.map((id, index) => {
-        const item = previous.find((i) => i.id === id);
-        return item ? { ...item, sortOrder: index } : null;
-      }).filter((i): i is InventoryItem => i !== null);
+      const optimistic = order
+        .map((id, index) => {
+          const item = previous.find((i) => i.id === id);
+          return item ? { ...item, sortOrder: index } : null;
+        })
+        .filter((i): i is InventoryItem => i !== null);
       setInv(optimistic.sort(sortInv));
 
       try {
@@ -827,10 +848,7 @@ export function useRentalApp() {
   const availableTotal = inv.reduce((s, i) => s + avail(i.id), 0);
   const outTotal = Object.values(outMap).reduce((s, n) => s + n, 0);
 
-  const itemOutQty = useCallback(
-    (id: number) => outMap[id] || 0,
-    [outMap],
-  );
+  const itemOutQty = useCallback((id: number) => outMap[id] || 0, [outMap]);
 
   return {
     tab,

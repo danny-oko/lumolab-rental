@@ -14,7 +14,9 @@ import { normalizeCategoryName } from "@/lib/rental/categories";
 import { resolveInventoryItemId } from "@/lib/rental/pricing";
 import type { InventoryItem, RentalRecord } from "@/lib/rental/types";
 
-export type NewInventoryItem = Omit<InventoryItem, "id" | "sortOrder">;
+export type NewInventoryItem = Omit<InventoryItem, "id" | "sortOrder" | "icon"> & {
+  icon?: string;
+};
 
 export class InventoryInUseError extends Error {
   activeQty: number;
@@ -102,6 +104,7 @@ export async function updateInventoryItem(
     qty: "qty",
     price: "price",
     cat: "cat",
+    icon: "icon",
     noStand: "no_stand",
     noFree: "no_free",
     isStand: "is_stand",
@@ -117,10 +120,7 @@ export async function updateInventoryItem(
         : 0
       : value;
 
-  await d1Run(`UPDATE inventory SET ${column} = ? WHERE id = ?`, [
-    dbValue,
-    id,
-  ]);
+  await d1Run(`UPDATE inventory SET ${column} = ? WHERE id = ?`, [dbValue, id]);
 
   const row = await d1All<InventoryRow>(
     "SELECT * FROM inventory WHERE id = ?",
@@ -156,8 +156,8 @@ export async function createInventoryItem(
   );
 
   await d1Run(
-    `INSERT INTO inventory (id, name, qty, price, cat, sort_order, no_stand, no_free, is_stand)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO inventory (id, name, qty, price, cat, sort_order, icon, no_stand, no_free, is_stand)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       next_id,
       item.name.trim(),
@@ -165,15 +165,17 @@ export async function createInventoryItem(
       item.price,
       item.cat,
       next_order,
+      item.icon?.trim() || "📦",
       item.noStand ? 1 : 0,
       item.noFree ? 1 : 0,
       item.isStand ? 1 : 0,
     ],
   );
 
-  const row = await d1All<InventoryRow>("SELECT * FROM inventory WHERE id = ?", [
-    next_id,
-  ]);
+  const row = await d1All<InventoryRow>(
+    "SELECT * FROM inventory WHERE id = ?",
+    [next_id],
+  );
   if (!row[0]) throw new Error("Failed to create inventory item");
   return rowToInventory(row[0]);
 }
@@ -228,7 +230,9 @@ export async function listRentals(): Promise<RentalRecord[]> {
   );
 }
 
-export async function createRental(rental: RentalRecord): Promise<RentalRecord> {
+export async function createRental(
+  rental: RentalRecord,
+): Promise<RentalRecord> {
   const statements = [
     {
       sql: `INSERT INTO rentals (
