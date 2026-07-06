@@ -111,11 +111,7 @@ export function categorySortIndex(
 export function compareInventoryItems(
   a: InventoryItem,
   b: InventoryItem,
-  categories: CategoryDef[] = DEFAULT_CATEGORIES,
+  _categories: CategoryDef[] = DEFAULT_CATEGORIES,
 ): number {
-  return (
-    categorySortIndex(a.cat, categories) - categorySortIndex(b.cat, categories) ||
-    a.sortOrder - b.sortOrder ||
-    a.id - b.id
-  );
+  return a.sortOrder - b.sortOrder || a.id - b.id;
 }

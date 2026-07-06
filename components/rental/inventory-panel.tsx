@@ -81,7 +81,8 @@ export function InventoryPanel({
 }: InventoryPanelProps) {
   const [showAdd, setShowAdd] = useState(false);
   const saving = invSaveState === "saving";
-  const canReorder = !invEditing && !busy && !!onReorderInventory;
+  const canReorder =
+    !invEditing && !busy && !!onReorderInventory && catFilter === "all";
 
   const { getDragProps } = useDragReorder({
     items: filteredInv,
@@ -337,9 +338,10 @@ export function InventoryPanel({
       <div className="hr" />
       <p className="panel-note">
         {canReorder
-          ? "Жагсаалтын дарааллыг чирж өөрчилнө — хадгалалт шууд бааз руу синк хийгдэнэ."
-          : null}
-        {canReorder ? " " : null}
+          ? "Жагсаалтын дарааллыг чирж өөрчилнө — хадгалалт шууд бааз руу синк хийгдэнэ. "
+          : catFilter !== "all"
+            ? "Бүх төрлийг сонгосон үед л дарааллыг чирж өөрчилнө. "
+            : null}
         Ray гэрэл (660C/360C/120C) түрээслэхэд стенд автоматаар ₮0-р дагалдана.
         Ace25C, Halo 60x, B7C Bulb-д стенд дагалдахгүй. Combo stand нь тусдаа
         бүтээгдэхүүн бөгөөд үнэгүй дагалдахгүй.

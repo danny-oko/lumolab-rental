@@ -773,31 +773,9 @@ export function useRentalApp() {
     [showError, storedCategories],
   );
 
-  function computeInventoryReorderIds(
-    allItems: InventoryItem[],
-    visibleItems: InventoryItem[],
-    newVisibleOrder: InventoryItem[],
-  ): number[] {
-    const visibleIds = new Set(visibleItems.map((i) => i.id));
-    let vi = 0;
-    return allItems.map((item) => {
-      if (visibleIds.has(item.id)) {
-        return newVisibleOrder[vi++].id;
-      }
-      return item.id;
-    });
-  }
-
   const reorderInventory = useCallback(
-    async (newVisibleOrder: InventoryItem[]) => {
-      const allItems = [...invRef.current].sort(sortInv);
-      const visibleIds = new Set(newVisibleOrder.map((i) => i.id));
-      const visibleItems = allItems.filter((i) => visibleIds.has(i.id));
-      const order = computeInventoryReorderIds(
-        allItems,
-        visibleItems,
-        newVisibleOrder,
-      );
+    async (newOrder: InventoryItem[]) => {
+      const order = newOrder.map((i) => i.id);
 
       reorderingRef.current = true;
       const previous = invRef.current;
