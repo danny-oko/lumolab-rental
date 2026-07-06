@@ -1,16 +1,20 @@
 import { d1All, d1Batch, d1Run } from "@/lib/db/d1";
 import {
   customerToParams,
+  rowToCategory,
   rowToInventory,
   rowToRental,
+  type CategoryRow,
   type InventoryRow,
   type RentalItemRow,
   type RentalRow,
 } from "@/lib/db/mappers";
+import type { CategoryDef } from "@/lib/rental/categories";
+import { normalizeCategoryName } from "@/lib/rental/categories";
 import { resolveInventoryItemId } from "@/lib/rental/pricing";
 import type { InventoryItem, RentalRecord } from "@/lib/rental/types";
 
-export type NewInventoryItem = Omit<InventoryItem, "id">;
+export type NewInventoryItem = Omit<InventoryItem, "id" | "sortOrder">;
 
 export class InventoryInUseError extends Error {
   activeQty: number;
@@ -24,9 +28,68 @@ export class InventoryInUseError extends Error {
 
 export async function listInventory(): Promise<InventoryItem[]> {
   const rows = await d1All<InventoryRow>(
-    "SELECT * FROM inventory ORDER BY id ASC",
+    "SELECT * FROM inventory ORDER BY sort_order ASC, id ASC",
   );
   return rows.map(rowToInventory);
+}
+
+export async function listCategories(): Promise<CategoryDef[]> {
+  const rows = await d1All<CategoryRow>(
+    "SELECT * FROM categories ORDER BY sort_order ASC, name ASC",
+  );
+  return rows.map(rowToCategory);
+}
+
+export async function createCategory(
+  def: Pick<CategoryDef, "name" | "emoji">,
+): Promise<CategoryDef> {
+  const name = normalizeCategoryName(def.name);
+  if (!name) throw new Error("Category name is required");
+
+  const existing = await d1All<CategoryRow>(
+    "SELECT name FROM categories WHERE name = ?",
+    [name],
+  );
+  if (existing.length > 0) throw new Error("Category already exists");
+
+  const [{ next_order }] = await d1All<{ next_order: number }>(
+    "SELECT COALESCE(MAX(sort_order), -1) + 1 AS next_order FROM categories",
+  );
+
+  const emoji = def.emoji.trim() || "📁";
+  await d1Run(
+    "INSERT INTO categories (name, emoji, sort_order, builtin) VALUES (?, ?, ?, 0)",
+    [name, emoji, next_order],
+  );
+
+  const row = await d1All<CategoryRow>(
+    "SELECT * FROM categories WHERE name = ?",
+    [name],
+  );
+  if (!row[0]) throw new Error("Failed to create category");
+  return rowToCategory(row[0]);
+}
+
+export async function reorderCategories(
+  orderedNames: string[],
+): Promise<CategoryDef[]> {
+  const statements = orderedNames.map((name, index) => ({
+    sql: "UPDATE categories SET sort_order = ? WHERE name = ?",
+    params: [index, name],
+  }));
+  if (statements.length > 0) await d1Batch(statements);
+  return listCategories();
+}
+
+export async function reorderInventory(
+  orderedIds: number[],
+): Promise<InventoryItem[]> {
+  const statements = orderedIds.map((id, index) => ({
+    sql: "UPDATE inventory SET sort_order = ? WHERE id = ?",
+    params: [index, id],
+  }));
+  if (statements.length > 0) await d1Batch(statements);
+  return listInventory();
 }
 
 export async function updateInventoryItem(
@@ -88,16 +151,20 @@ export async function createInventoryItem(
   const [{ next_id }] = await d1All<{ next_id: number }>(
     "SELECT COALESCE(MAX(id), 0) + 1 AS next_id FROM inventory",
   );
+  const [{ next_order }] = await d1All<{ next_order: number }>(
+    "SELECT COALESCE(MAX(sort_order), -1) + 1 AS next_order FROM inventory",
+  );
 
   await d1Run(
-    `INSERT INTO inventory (id, name, qty, price, cat, no_stand, no_free, is_stand)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO inventory (id, name, qty, price, cat, sort_order, no_stand, no_free, is_stand)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       next_id,
       item.name.trim(),
       item.qty,
       item.price,
       item.cat,
+      next_order,
       item.noStand ? 1 : 0,
       item.noFree ? 1 : 0,
       item.isStand ? 1 : 0,

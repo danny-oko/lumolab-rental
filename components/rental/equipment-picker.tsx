@@ -1,4 +1,4 @@
-import { CategoryFilter } from "@/components/rental/category-filter";
+import { CategoryFilter, CategoryLabel } from "@/components/rental/category-filter";
 import { ItemNameCell } from "@/components/rental/item-name-cell";
 import { QtyStepper } from "@/components/rental/qty-stepper";
 import { fmt } from "@/lib/rental/constants";
@@ -76,7 +76,9 @@ export function EquipmentPicker({
                   <td>
                     <ItemNameCell item={i} variant="rental" />
                   </td>
-                  <td className="small muted col-type">{i.cat}</td>
+                  <td className="small muted col-type">
+                    <CategoryLabel name={i.cat} />
+                  </td>
                   <td className="num">
                     <span className={a > 0 ? "ok" : "danger"}>{a}</span>
                   </td>

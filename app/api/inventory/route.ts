@@ -1,4 +1,5 @@
 import { deleteInventorySchema, patchInventorySchema, createInventorySchema } from "@/lib/api/schemas";
+import { reorderInventorySchema } from "@/lib/api/category-schemas";
 import {
   logInventoryCreate,
   logInventoryDelete,
@@ -11,6 +12,7 @@ import {
   deleteInventoryItem,
   InventoryInUseError,
   listInventory,
+  reorderInventory,
   updateInventoryFlags,
   updateInventoryItem,
 } from "@/lib/db/repository";
@@ -48,8 +50,38 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  const parsed = await parseJsonBody(request, patchInventorySchema);
-  if ("error" in parsed) return parsed.error;
+  const raw = await request.json().catch(() => null);
+  if (!raw || typeof raw !== "object") {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  if ("order" in raw) {
+    const parsed = reorderInventorySchema.safeParse(raw);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message ?? "Invalid reorder payload" },
+        { status: 400 },
+      );
+    }
+    try {
+      const inventory = await reorderInventory(parsed.data.order);
+      return NextResponse.json(inventory);
+    } catch (err) {
+      console.error("PATCH /api/inventory reorder", err);
+      return NextResponse.json(
+        { error: err instanceof Error ? err.message : "Failed to reorder inventory" },
+        { status: 500 },
+      );
+    }
+  }
+
+  const parsed = patchInventorySchema.safeParse(raw);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.issues[0]?.message ?? "Invalid patch payload" },
+      { status: 400 },
+    );
+  }
 
   const body = parsed.data;
 

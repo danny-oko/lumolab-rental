@@ -556,6 +556,249 @@ body {
   letter-spacing: 0.3px;
 }
 
+.lumo-app .inv-add-form__field input[type="text"],
+.lumo-app .inv-add-form__field .inv-num-input,
+.lumo-app .inv-add-form__field select,
+.lumo-app .inv-add-form__field .inv-flag-select,
+.lumo-app .inv-add-form__field .cat-select__input,
+.lumo-app .inv-add-form__field .cat-select__add-btn {
+  box-sizing: border-box;
+  height: 36px;
+  min-height: 36px;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.lumo-app .inv-add-form__field input[type="text"],
+.lumo-app .inv-add-form__field .inv-num-input,
+.lumo-app .inv-add-form__field select,
+.lumo-app .inv-add-form__field .inv-flag-select,
+.lumo-app .inv-add-form__field .cat-select__input {
+  padding: 0 10px;
+}
+
+.lumo-app .inv-add-form__field select,
+.lumo-app .inv-add-form__field .inv-flag-select,
+.lumo-app .inv-add-form__field .cat-select__input {
+  padding-right: 28px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: var(--input-bg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b97a8' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 12px;
+  cursor: pointer;
+}
+
+.lumo-app .inv-add-form__field--cat {
+  min-width: 0;
+}
+
+.lumo-app .inv-add-form__cat-panel {
+  margin-top: 10px;
+}
+
+.lumo-app .cat-select {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  min-width: 0;
+}
+
+.lumo-app .cat-select__input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  background: var(--input-bg);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: 7px;
+  font-family: inherit;
+}
+
+.lumo-app .cat-select__add-btn {
+  flex-shrink: 0;
+  width: 36px;
+  min-width: 36px;
+  padding: 0;
+  border-radius: 7px;
+  border: 1px solid var(--line);
+  background: var(--input-bg);
+  color: var(--mut);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    color 0.15s,
+    background 0.15s;
+}
+
+.lumo-app .cat-select__add-btn:hover,
+.lumo-app .cat-select__add-btn.is-active {
+  border-color: var(--acc);
+  color: var(--acc);
+  background: color-mix(in srgb, var(--acc) 10%, var(--input-bg));
+}
+
+.lumo-app .cat-select--compact {
+  gap: 4px;
+}
+
+.lumo-app .cat-select--compact .cat-select__add-btn {
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  min-height: 32px;
+  font-size: 17px;
+}
+
+.lumo-app .cat-select--compact .cat-select__input {
+  height: 32px;
+  min-height: 32px;
+  font-size: 12px;
+  padding: 0 24px 0 8px;
+}
+
+.lumo-app .cat-select__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(2px);
+}
+
+.lumo-app .cat-select__overlay-panel {
+  width: min(440px, 100%);
+  max-height: min(90vh, 520px);
+  overflow: auto;
+}
+
+.lumo-app .cat-add-panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+}
+
+.lumo-app .inv-add-form__cat-panel.cat-add-panel {
+  box-shadow: none;
+  background: color-mix(in srgb, var(--panel) 88%, var(--acc) 12%);
+  border-color: color-mix(in srgb, var(--acc) 28%, var(--line));
+}
+
+.lumo-app .cat-add-panel--embedded .cat-add-panel__body {
+  padding-top: 12px;
+}
+
+.lumo-app .cat-add-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px 0;
+}
+
+.lumo-app .cat-add-panel__title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: var(--txt);
+}
+
+.lumo-app .cat-add-panel__close {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--mut);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.lumo-app .cat-add-panel__close:hover {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
+}
+
+.lumo-app .cat-add-panel__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 72px auto;
+  gap: 12px;
+  align-items: end;
+  padding: 10px 12px 12px;
+}
+
+.lumo-app .cat-add-panel__name > span,
+.lumo-app .cat-add-panel__icon > span {
+  display: block;
+  color: var(--mut);
+  font-size: 10px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.lumo-app .cat-add-panel__name input,
+.lumo-app .cat-add-panel__icon-input {
+  width: 100%;
+  box-sizing: border-box;
+  height: 36px;
+  padding: 0 10px;
+  font-size: 13px;
+  background: var(--input-bg);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: 7px;
+  font-family: inherit;
+}
+
+.lumo-app .cat-add-panel__icon-input {
+  padding: 0;
+  text-align: center;
+  font-size: 22px;
+  line-height: 36px;
+}
+
+.lumo-app .cat-add-panel__name input:focus,
+.lumo-app .cat-add-panel__icon-input:focus {
+  outline: none;
+  border-color: var(--acc);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--acc) 22%, transparent);
+}
+
+.lumo-app .cat-add-panel__icon-input::placeholder {
+  font-size: 20px;
+  opacity: 0.45;
+}
+
+.lumo-app .cat-add-panel__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 1px;
+}
+
+@media (max-width: 900px) {
+  .lumo-app .cat-add-panel__body {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .lumo-app .cat-add-panel__actions {
+    flex-direction: row;
+  }
+}
+
 .lumo-app .inv-name-edit {
   display: flex;
   align-items: flex-start;
@@ -932,29 +1175,15 @@ body {
   display: flex;
 }
 
-.lumo-app .cat-icon {
+.lumo-app .cat-emoji {
   display: inline-flex;
-  line-height: 0;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
-.lumo-app .cat-icon--gerel {
-  color: var(--icon-gerel);
-}
-
-.lumo-app .cat-icon--fixture {
-  color: var(--icon-fixture);
-}
-
-.lumo-app .cat-icon--stand {
-  color: var(--icon-stand);
-}
-
-.lumo-app .cat-icon--battery {
-  color: var(--icon-battery);
-}
-
-.lumo-app .cat-icon--other {
-  color: var(--icon-other);
+.lumo-app .cat-pill__emoji {
+  margin-right: 4px;
 }
 
 .lumo-app .item-name__text {
@@ -1294,6 +1523,19 @@ body {
 .lumo-app .rental-cart__totals .cartline {
   padding: 6px 0;
   font-size: 12px;
+}
+
+.lumo-app .rental-cart__totals .cartline--checkbox {
+  cursor: pointer;
+  user-select: none;
+}
+
+.lumo-app .rental-cart__totals .cartline__check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+  font-weight: 600;
 }
 
 .lumo-app .rental-cart__totals .cartline--grand {
@@ -1728,3 +1970,47 @@ body {
   background: var(--out);
   color: #fff;
 }
+
+.drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 4px;
+  color: var(--mut);
+  font-size: 10px;
+  letter-spacing: -2px;
+  cursor: grab;
+  user-select: none;
+  opacity: 0.55;
+}
+
+.pill-draggable,
+.inv-row--draggable {
+  cursor: grab;
+}
+
+.pill-draggable[data-dragging],
+.inv-row--draggable[data-dragging] {
+  opacity: 0.45;
+}
+
+.pill-draggable[data-drag-over],
+.inv-row--draggable[data-drag-over] {
+  outline: 2px dashed var(--acc);
+  outline-offset: 2px;
+}
+
+.pill-row--reorderable .pill-draggable {
+  padding-left: 8px;
+}
+
+.col-inv-drag {
+  width: 28px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.inv-row--draggable .col-inv-drag .drag-handle {
+  margin-right: 0;
+}
+

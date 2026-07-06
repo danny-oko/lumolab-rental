@@ -25,9 +25,12 @@ type RentalPanelProps = Pick<
   | "addVat"
   | "vatAmt"
   | "charged"
+  | "employeeDiscount"
+  | "employeeDiscountAmt"
   | "cust"
   | "setDays"
   | "setPriceMode"
+  | "setEmployeeDiscount"
   | "setCust"
   | "checkout"
 >;
@@ -55,9 +58,12 @@ export function RentalPanel(props: RentalPanelProps) {
     addVat,
     vatAmt,
     charged,
+    employeeDiscount,
+    employeeDiscountAmt,
     cust,
     setDays,
     setPriceMode,
+    setEmployeeDiscount,
     setCust,
     checkout,
   } = props;
@@ -88,10 +94,13 @@ export function RentalPanel(props: RentalPanelProps) {
         addVat={addVat}
         vatAmt={vatAmt}
         charged={charged}
+        employeeDiscount={employeeDiscount}
+        employeeDiscountAmt={employeeDiscountAmt}
         durMult={durMult}
         cust={cust}
         onDaysChange={setDays}
         onPriceModeChange={setPriceMode}
+        onEmployeeDiscountChange={setEmployeeDiscount}
         onCustChange={setCust}
         onCheckout={checkout}
       />

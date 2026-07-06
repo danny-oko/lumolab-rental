@@ -1,7 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { bySort, VAT } from "@/lib/rental/constants";
+import { VAT } from "@/lib/rental/constants";
+import {
+  compareInventoryItems,
+  DEFAULT_CATEGORIES,
+  mergeCategories,
+  readLegacyCustomCategories,
+  clearLegacyCustomCategories,
+  type CategoryDef,
+  NewCategoryInput,
+} from "@/lib/rental/categories";
 import { emptyCustomer } from "@/lib/rental/empty-customer";
 import {
   buildCartLines,
@@ -72,6 +81,14 @@ function getDirtyFields(
   return fields;
 }
 
+function inventorySort(
+  a: InventoryItem,
+  b: InventoryItem,
+  categories = DEFAULT_CATEGORIES,
+) {
+  return compareInventoryItems(a, b, categories);
+}
+
 function mergeInventory(
   server: InventoryItem[],
   local: InventoryItem[],
@@ -80,7 +97,7 @@ function mergeInventory(
   const localById = new Map(local.map((i) => [i.id, i]));
   return server
     .map((item) => (pendingIds.has(item.id) ? (localById.get(item.id) ?? item) : item))
-    .sort(bySort);
+    .sort((a, b) => inventorySort(a, b));
 }
 
 function clampCart(
@@ -126,7 +143,9 @@ export function useRentalApp() {
   const [rentalFilter, setRentalFilter] = useState<RentalHistoryFilter>("all");
   const [cust, setCust] = useState<Customer>(emptyCustomer);
   const [priceMode, setPriceMode] = useState<PriceMode>("base");
+  const [employeeDiscount, setEmployeeDiscount] = useState(false);
   const [catFilter, setCatFilter] = useState<Category | "all">("all");
+  const [storedCategories, setStoredCategories] = useState<CategoryDef[]>([]);
   const [theme, setTheme] = useState<Theme>("dark");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -142,6 +161,7 @@ export function useRentalApp() {
   const invSavingRef = useRef(false);
   const busyRef = useRef(busy);
   const syncingRef = useRef(false);
+  const reorderingRef = useRef(false);
   const settingsHydratedRef = useRef(false);
 
   useEffect(() => {
@@ -170,6 +190,28 @@ export function useRentalApp() {
     busyRef.current = busy;
   }, [busy]);
 
+  const addCategory = useCallback(async (def: NewCategoryInput) => {
+    const created = await apiJson<CategoryDef>("/api/categories", {
+      method: "POST",
+      body: JSON.stringify(def),
+    });
+    setStoredCategories((current) =>
+      [...current, created].sort((a, b) => a.sortOrder - b.sortOrder),
+    );
+  }, []);
+
+  const categories = useMemo(
+    () => mergeCategories(inv, storedCategories),
+    [inv, storedCategories],
+  );
+  const categoriesRef = useRef(categories);
+  categoriesRef.current = categories;
+  const sortInv = useCallback(
+    (a: InventoryItem, b: InventoryItem) =>
+      inventorySort(a, b, categoriesRef.current),
+    [],
+  );
+
   const pendingInventoryIds = useCallback((): Set<number> => {
     const pending = new Set<number>();
     for (const item of invRef.current) {
@@ -184,6 +226,7 @@ export function useRentalApp() {
     (
       inventory: InventoryItem[],
       rentalList: RentalRecord[],
+      categoryList: CategoryDef[],
       fullLoad = false,
     ) => {
       const pending = pendingInventoryIds();
@@ -196,10 +239,38 @@ export function useRentalApp() {
         }
         return next;
       });
+      if (!reorderingRef.current) {
+        setStoredCategories(categoryList);
+      }
       setRentals(rentalList);
       setCart((c) => clampCart(c, inventory, rentalList));
     },
     [pendingInventoryIds],
+  );
+
+  const migrateLegacyCategories = useCallback(
+    async (categoryList: CategoryDef[]) => {
+      const legacy = readLegacyCustomCategories();
+      if (legacy.length === 0) return categoryList;
+      const known = new Set(categoryList.map((c) => c.name));
+      let next = [...categoryList];
+      for (const def of legacy) {
+        if (known.has(def.name)) continue;
+        try {
+          const created = await apiJson<CategoryDef>("/api/categories", {
+            method: "POST",
+            body: JSON.stringify(def),
+          });
+          next = [...next, created];
+          known.add(created.name);
+        } catch {
+          // already exists or failed — skip
+        }
+      }
+      clearLegacyCustomCategories();
+      return next.sort((a, b) => a.sortOrder - b.sortOrder);
+    },
+    [],
   );
 
   const syncData = useCallback(async () => {
@@ -207,17 +278,19 @@ export function useRentalApp() {
       document.hidden ||
       busyRef.current ||
       syncingRef.current ||
-      invSavingRef.current
+      invSavingRef.current ||
+      reorderingRef.current
     ) {
       return;
     }
     syncingRef.current = true;
     try {
-      const [inventory, rentalList] = await Promise.all([
+      const [inventory, rentalList, categoryList] = await Promise.all([
         apiJson<InventoryItem[]>("/api/inventory"),
         apiJson<RentalRecord[]>("/api/rentals"),
+        apiJson<CategoryDef[]>("/api/categories"),
       ]);
-      applyServerData(inventory, rentalList);
+      applyServerData(inventory, rentalList, categoryList);
     } catch (err) {
       console.warn("Background sync failed:", err);
     } finally {
@@ -229,17 +302,19 @@ export function useRentalApp() {
     setLoading(true);
     setError(null);
     try {
-      const [inventory, rentalList] = await Promise.all([
+      const [inventory, rentalList, categoryList] = await Promise.all([
         apiJson<InventoryItem[]>("/api/inventory"),
         apiJson<RentalRecord[]>("/api/rentals"),
+        apiJson<CategoryDef[]>("/api/categories"),
       ]);
-      applyServerData(inventory, rentalList, true);
+      const migrated = await migrateLegacyCategories(categoryList);
+      applyServerData(inventory, rentalList, migrated, true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load data");
     } finally {
       setLoading(false);
     }
-  }, [applyServerData]);
+  }, [applyServerData, migrateLegacyCategories]);
 
   useEffect(() => {
     void loadData();
@@ -290,13 +365,10 @@ export function useRentalApp() {
 
   const freeShort = calcFreeShort(lines, freeEntitlement);
 
-  const { grossDur, discountAmt, base, addVat, vatAmt, charged } = calcTotals(
-    lines,
-    durMult,
-    longDiscount,
-    priceMode,
-    VAT,
-  );
+  const { grossDur, discountAmt, base, addVat, vatAmt, charged: subtotal } =
+    calcTotals(lines, durMult, longDiscount, priceMode, VAT);
+  const employeeDiscountAmt = employeeDiscount ? subtotal * 0.5 : 0;
+  const charged = subtotal - employeeDiscountAmt;
 
   const setQty = (id: number, v: number) => {
     const max = avail(id);
@@ -376,12 +448,12 @@ export function useRentalApp() {
           const saved = invBaselineRef.current.get(item.id);
           return saved ? { ...saved } : item;
         })
-        .sort(bySort),
+        .sort(sortInv),
     );
     if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
     setInvSaveState("idle");
     setInvEditing(false);
-  }, []);
+  }, [sortInv]);
 
   const startInvEditing = useCallback(() => {
     setInvEditing(true);
@@ -422,14 +494,14 @@ export function useRentalApp() {
     );
   }
 
-  async function addItem(item: Omit<InventoryItem, "id">) {
+  async function addItem(item: Omit<InventoryItem, "id" | "sortOrder">) {
     try {
       setBusy(true);
       const created = await apiJson<InventoryItem>("/api/inventory", {
         method: "POST",
         body: JSON.stringify(item),
       });
-      setInv((iv) => [...iv, created].sort(bySort));
+      setInv((iv) => [...iv, created].sort(sortInv));
       setInvBaseline((prev) => {
         const next = new Map(prev);
         next.set(created.id, { ...created });
@@ -549,6 +621,7 @@ export function useRentalApp() {
       setCart({});
       setDays(0.5);
       setCust(emptyCustomer);
+      setEmployeeDiscount(false);
       setTab("active");
     } catch (err) {
       void showError(err);
@@ -642,6 +715,105 @@ export function useRentalApp() {
     }
   }
 
+  const reorderCategories = useCallback(
+    async (newVisibleOrder: CategoryDef[]) => {
+      const allCategories = mergeCategories(invRef.current, storedCategories);
+      const visibleNames = new Set(newVisibleOrder.map((c) => c.name));
+      let vi = 0;
+      const order = allCategories.map((c) => {
+        if (visibleNames.has(c.name)) {
+          return newVisibleOrder[vi++].name;
+        }
+        return c.name;
+      });
+
+      reorderingRef.current = true;
+      const previous = storedCategories;
+      const optimistic = order.map((name, index) => {
+        const cat = allCategories.find((c) => c.name === name);
+        return cat ? { ...cat, sortOrder: index } : null;
+      }).filter((c): c is CategoryDef => c !== null);
+      setStoredCategories(
+        optimistic.filter((c) => previous.some((p) => p.name === c.name)),
+      );
+
+      try {
+        const updated = await apiJson<CategoryDef[]>("/api/categories", {
+          method: "PATCH",
+          body: JSON.stringify({ order }),
+        });
+        setStoredCategories(updated);
+      } catch (err) {
+        setStoredCategories(previous);
+        void showError(err);
+        console.error(err);
+      } finally {
+        reorderingRef.current = false;
+      }
+    },
+    [showError, storedCategories],
+  );
+
+  function computeInventoryReorderIds(
+    allItems: InventoryItem[],
+    visibleItems: InventoryItem[],
+    newVisibleOrder: InventoryItem[],
+  ): number[] {
+    const visibleIds = new Set(visibleItems.map((i) => i.id));
+    let vi = 0;
+    return allItems.map((item) => {
+      if (visibleIds.has(item.id)) {
+        return newVisibleOrder[vi++].id;
+      }
+      return item.id;
+    });
+  }
+
+  const reorderInventory = useCallback(
+    async (newVisibleOrder: InventoryItem[]) => {
+      const allItems = [...invRef.current].sort(sortInv);
+      const visibleIds = new Set(newVisibleOrder.map((i) => i.id));
+      const visibleItems = allItems.filter((i) => visibleIds.has(i.id));
+      const order = computeInventoryReorderIds(
+        allItems,
+        visibleItems,
+        newVisibleOrder,
+      );
+
+      reorderingRef.current = true;
+      const previous = invRef.current;
+      const optimistic = order.map((id, index) => {
+        const item = previous.find((i) => i.id === id);
+        return item ? { ...item, sortOrder: index } : null;
+      }).filter((i): i is InventoryItem => i !== null);
+      setInv(optimistic.sort(sortInv));
+
+      try {
+        const updated = await apiJson<InventoryItem[]>("/api/inventory", {
+          method: "PATCH",
+          body: JSON.stringify({ order }),
+        });
+        setInv(updated.sort(sortInv));
+        setInvBaseline((prev) => {
+          const next = new Map(prev);
+          for (const item of updated) next.set(item.id, { ...item });
+          return next;
+        });
+        invRef.current = updated;
+        invBaselineRef.current = new Map(
+          updated.map((item) => [item.id, { ...item }]),
+        );
+      } catch (err) {
+        setInv(previous);
+        void showError(err);
+        console.error(err);
+      } finally {
+        reorderingRef.current = false;
+      }
+    },
+    [showError, sortInv],
+  );
+
   const totalSku = inv.length;
   const activeR = rentals.filter((r) => r.status === "out").length;
   const filteredRentals = useMemo(() => {
@@ -650,7 +822,7 @@ export function useRentalApp() {
   }, [rentals, rentalFilter]);
   const filteredInv = inv
     .filter((i) => catFilter === "all" || i.cat === catFilter)
-    .sort(bySort);
+    .sort(sortInv);
 
   const availableTotal = inv.reduce((s, i) => s + avail(i.id), 0);
   const outTotal = Object.values(outMap).reduce((s, n) => s + n, 0);
@@ -675,6 +847,9 @@ export function useRentalApp() {
     setCust,
     priceMode,
     setPriceMode,
+    employeeDiscount,
+    setEmployeeDiscount,
+    employeeDiscountAmt,
     catFilter,
     setCatFilter,
     theme,
@@ -718,6 +893,10 @@ export function useRentalApp() {
     startInvEditing,
     editFlagMode,
     addItem,
+    addCategory,
+    categories,
+    reorderCategories,
+    reorderInventory,
     deleteItem,
     confirmState,
     alertState,

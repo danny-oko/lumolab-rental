@@ -1,7 +1,10 @@
-import { CATS } from "@/lib/rental/constants";
 import { z } from "zod";
 
-export const categorySchema = z.enum(CATS);
+export const categorySchema = z
+  .string()
+  .trim()
+  .min(1, "Category is required")
+  .max(32, "Category name is too long");
 
 export const customerSchema = z.object({
   name: z.string().trim().min(1, "Customer name is required"),
@@ -112,7 +115,7 @@ const patchInventoryFieldSchema = z
       if (!parsed.success) {
         ctx.addIssue({
           code: "custom",
-          message: "Invalid category",
+          message: parsed.error.issues[0]?.message ?? "Invalid category",
           path: ["value"],
         });
       }

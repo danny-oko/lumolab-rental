@@ -1,13 +1,7 @@
 import { z } from "zod";
 import type { Category, PriceMode, RentalHistoryFilter, Theme } from "./types";
 
-const categorySchema = z.enum([
-  "ГЭРЭЛ",
-  "FIXTURE",
-  "СТЕНД",
-  "БАТТЕРЭЙ",
-  "БУСАД",
-]);
+const categorySchema = z.string().trim().min(1).max(32);
 
 export const userSettingsSchema = z.object({
   theme: z.enum(["dark", "light"]).optional(),

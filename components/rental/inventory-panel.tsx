@@ -1,14 +1,16 @@
 "use client";
 
-import { CategoryFilter } from "@/components/rental/category-filter";
+import { CategoryFilter, CategoryLabel } from "@/components/rental/category-filter";
+import { CategorySelect } from "@/components/rental/category-select";
 import { CatIcon } from "@/components/rental/icons";
 import { InvFlagSelect } from "@/components/rental/inv-flag-select";
 import { InvNumInput } from "@/components/rental/inv-num-input";
 import { InventoryAddForm } from "@/components/rental/inventory-add-form";
 import { ItemNameCell } from "@/components/rental/item-name-cell";
+import { useDragReorder } from "@/components/rental/use-drag-reorder";
 import type { InventorySyncState } from "@/components/rental/use-rental-app";
 import type { AlertOptions } from "@/components/rental/use-alert-dialog";
-import { CATS } from "@/lib/rental/constants";
+import type { CategoryDef, NewCategoryInput } from "@/lib/rental/categories";
 import {
   getInvFlagMode,
   INV_FLAG_OPTIONS,
@@ -36,8 +38,11 @@ type InventoryPanelProps = {
   onSaveAll: () => void;
   onDiscardAll: () => void;
   onEditFlagMode: (id: number, mode: InvFlagMode) => void;
-  onAddItem: (item: Omit<InventoryItem, "id">) => Promise<unknown>;
+  onAddItem: (item: Omit<InventoryItem, "id" | "sortOrder">) => Promise<unknown>;
+  onAddCategory: (def: NewCategoryInput) => void | Promise<void>;
   onDeleteItem: (id: number) => void;
+  onReorderInventory?: (items: InventoryItem[]) => void | Promise<void>;
+  onReorderCategories?: (categories: CategoryDef[]) => void | Promise<void>;
   onAlert: (opts: AlertOptions | string) => Promise<void>;
   itemOutQty: (id: number) => number;
 };
@@ -62,12 +67,23 @@ export function InventoryPanel({
   onDiscardAll,
   onEditFlagMode,
   onAddItem,
+  onAddCategory,
   onDeleteItem,
+  onReorderInventory,
+  onReorderCategories,
   onAlert,
   itemOutQty,
 }: InventoryPanelProps) {
   const [showAdd, setShowAdd] = useState(false);
   const saving = invSaveState === "saving";
+  const canReorder = !invEditing && !busy && !!onReorderInventory;
+
+  const { getDragProps } = useDragReorder({
+    items: filteredInv,
+    getKey: (item) => String(item.id),
+    onReorder: (next) => onReorderInventory?.(next),
+    disabled: !canReorder,
+  });
 
   return (
     <div className="panel">
@@ -125,6 +141,7 @@ export function InventoryPanel({
         <InventoryAddForm
           busy={busy}
           onAlert={onAlert}
+          onAddCategory={onAddCategory}
           onAdd={async (item) => {
             await onAddItem(item);
             setShowAdd(false);
@@ -137,13 +154,16 @@ export function InventoryPanel({
         catFilter={catFilter}
         inv={inv}
         showCounts
+        reorderable={!invEditing && !busy}
         onFilterChange={onFilterChange}
+        onReorder={onReorderCategories}
       />
 
       <div className="table-wrap">
         <table className="tbl-fixed table-inv">
           <thead>
             <tr>
+              {canReorder && <th className="col-inv-drag" aria-label="Эрэмбэ" />}
               <th className="col-inv-name">Нэр</th>
               <th className="col-inv-cat col-cat">Төрөл</th>
               <th className="col-inv-flag">Тэмдэглэл</th>
@@ -160,9 +180,26 @@ export function InventoryPanel({
               const flagMode = getInvFlagMode(i);
               const outQty = itemOutQty(i.id);
               const canDelete = outQty === 0;
+              const dragProps = canReorder ? getDragProps(i) : {};
 
               return (
-                <tr key={i.id} className={invEditing ? "inv-row--editing" : undefined}>
+                <tr
+                  key={i.id}
+                  className={[
+                    invEditing ? "inv-row--editing" : "",
+                    canReorder ? "inv-row--draggable" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ") || undefined}
+                  {...dragProps}
+                >
+                  {canReorder && (
+                    <td className="col-inv-drag">
+                      <span className="drag-handle" title="Чирж эрэмбэлэх" aria-hidden>
+                        ⋮⋮
+                      </span>
+                    </td>
+                  )}
                   <td className="col-inv-name">
                     {invEditing ? (
                       <div className="inv-name-edit">
@@ -186,21 +223,18 @@ export function InventoryPanel({
                   </td>
                   <td className="col-inv-cat col-cat">
                     {invEditing ? (
-                      <select
+                      <CategorySelect
+                        compact
                         className="input-cat"
                         value={i.cat}
-                        onChange={(e) =>
-                          onEditStock(i.id, "cat", e.target.value as Category)
-                        }
-                      >
-                        {CATS.map((c) => (
-                          <option key={c} value={c}>
-                            {c}
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(cat) => onEditStock(i.id, "cat", cat)}
+                        onAddCategory={onAddCategory}
+                        onError={(message) => void onAlert(message)}
+                      />
                     ) : (
-                      <span className="inv-view-text">{i.cat}</span>
+                      <span className="inv-view-text">
+                        <CategoryLabel name={i.cat} />
+                      </span>
                     )}
                   </td>
                   <td className="col-inv-flag">
@@ -281,6 +315,10 @@ export function InventoryPanel({
 
       <div className="hr" />
       <p className="panel-note">
+        {canReorder
+          ? "Жагсаалтын дарааллыг чирж өөрчилнө — хадгалалт шууд бааз руу синк хийгдэнэ."
+          : null}
+        {canReorder ? " " : null}
         Ray гэрэл (660C/360C/120C) түрээслэхэд стенд автоматаар ₮0-р дагалдана.
         Ace25C, Halo 60x, B7C Bulb-д стенд дагалдахгүй. Combo stand нь тусдаа
         бүтээгдэхүүн бөгөөд үнэгүй дагалдахгүй.

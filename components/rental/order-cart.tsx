@@ -15,10 +15,13 @@ type OrderCartProps = {
   addVat: boolean;
   vatAmt: number;
   charged: number;
+  employeeDiscount: boolean;
+  employeeDiscountAmt: number;
   durMult: number;
   cust: Customer;
   onDaysChange: (days: number) => void;
   onPriceModeChange: (mode: PriceMode) => void;
+  onEmployeeDiscountChange: (enabled: boolean) => void;
   onCustChange: (cust: Customer) => void;
   onCheckout: () => void;
 };
@@ -37,10 +40,13 @@ export function OrderCart({
   addVat,
   vatAmt,
   charged,
+  employeeDiscount,
+  employeeDiscountAmt,
   durMult,
   cust,
   onDaysChange,
   onPriceModeChange,
+  onEmployeeDiscountChange,
   onCustChange,
   onCheckout,
 }: OrderCartProps) {
@@ -179,6 +185,22 @@ export function OrderCart({
             <div className="cartline">
               <span className="muted">НӨАТ (10%)</span>
               <span className="price">+{fmt(vatAmt)}</span>
+            </div>
+          )}
+          <label className="cartline cartline--checkbox">
+            <span className="cartline__check">
+              <input
+                type="checkbox"
+                checked={employeeDiscount}
+                onChange={(e) => onEmployeeDiscountChange(e.target.checked)}
+              />
+              ажилчдын хөнгөлөлт
+            </span>
+          </label>
+          {employeeDiscount && (
+            <div className="cartline">
+              <span className="muted">Ажилчдын хөнгөлөлт (−50%)</span>
+              <span className="price ok">−{fmt(employeeDiscountAmt)}</span>
             </div>
           )}
           <div className="cartline cartline--grand">

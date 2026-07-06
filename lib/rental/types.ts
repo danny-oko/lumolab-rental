@@ -1,4 +1,4 @@
-export type Category = "ГЭРЭЛ" | "FIXTURE" | "СТЕНД" | "БАТТЕРЭЙ" | "БУСАД";
+export type Category = string;
 
 export interface InventoryItem {
   id: number;
@@ -6,6 +6,7 @@ export interface InventoryItem {
   qty: number;
   price: number;
   cat: Category;
+  sortOrder: number;
   noStand?: boolean;
   noFree?: boolean;
   isStand?: boolean;

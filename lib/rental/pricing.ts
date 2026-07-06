@@ -1,4 +1,4 @@
-import { bySort } from "./constants";
+import { compareInventoryItems, DEFAULT_CATEGORIES } from "./categories";
 import type { CartLine, InventoryItem, RentalRecord } from "./types";
 
 /** Cart lines use composite ids (e.g. `5_free`, `3_auto`) for UI keys; DB needs the inventory id. */
@@ -54,7 +54,9 @@ export function buildCartLines(
   const cartIds = Object.keys(cart)
     .map(Number)
     .filter((id) => (cart[id] || 0) > 0);
-  const cartItems = inv.filter((i) => cartIds.includes(i.id)).sort(bySort);
+  const cartItems = inv
+    .filter((i) => cartIds.includes(i.id))
+    .sort((a, b) => compareInventoryItems(a, b, DEFAULT_CATEGORIES));
 
   const eligStandIdsInCart = cartItems
     .filter((i) => i.isStand && !i.noFree)
