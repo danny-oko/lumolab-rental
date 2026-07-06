@@ -12,6 +12,7 @@ export function InvIconInput({ value, onChange }: InvIconInputProps) {
   const [draft, setDraft] = useState(value);
   const [focused, setFocused] = useState(false);
   const composingRef = useRef(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!focused) setDraft(value);
@@ -25,6 +26,7 @@ export function InvIconInput({ value, onChange }: InvIconInputProps) {
 
   return (
     <input
+      ref={inputRef}
       type="text"
       className="inv-icon-input"
       value={focused ? draft : value}
@@ -35,10 +37,10 @@ export function InvIconInput({ value, onChange }: InvIconInputProps) {
       autoComplete="off"
       autoCorrect="off"
       spellCheck={false}
-      onFocus={(e) => {
+      onFocus={() => {
         setFocused(true);
         setDraft(value);
-        requestAnimationFrame(() => e.currentTarget.select());
+        requestAnimationFrame(() => inputRef.current?.select());
       }}
       onCompositionStart={() => {
         composingRef.current = true;

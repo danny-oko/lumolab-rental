@@ -83,6 +83,76 @@ export async function reorderCategories(
   return listCategories();
 }
 
+export type UpdateCategoryPatch = {
+  name?: string;
+  emoji?: string;
+};
+
+export type UpdateCategoryResult = {
+  categories: CategoryDef[];
+  inventory: InventoryItem[];
+  oldName: string;
+  newName: string;
+};
+
+export async function updateCategory(
+  oldName: string,
+  patch: UpdateCategoryPatch,
+): Promise<UpdateCategoryResult> {
+  const normalizedOld = normalizeCategoryName(oldName);
+  if (!normalizedOld) throw new Error("Category not found");
+
+  const row = await d1All<CategoryRow>(
+    "SELECT * FROM categories WHERE name = ?",
+    [normalizedOld],
+  );
+  if (!row[0]) throw new Error("Category not found");
+
+  const nextName = patch.name
+    ? normalizeCategoryName(patch.name)
+    : normalizedOld;
+  if (!nextName) throw new Error("Category name is required");
+
+  const nextEmoji =
+    patch.emoji !== undefined
+      ? patch.emoji.trim() || row[0].emoji
+      : row[0].emoji;
+
+  if (nextName !== normalizedOld) {
+    const conflict = await d1All<CategoryRow>(
+      "SELECT name FROM categories WHERE name = ?",
+      [nextName],
+    );
+    if (conflict.length > 0) throw new Error("Category already exists");
+  }
+
+  const statements: { sql: string; params: (string | number)[] }[] = [];
+  if (nextName !== normalizedOld) {
+    statements.push({
+      sql: "UPDATE inventory SET cat = ? WHERE cat = ?",
+      params: [nextName, normalizedOld],
+    });
+    statements.push({
+      sql: "UPDATE categories SET name = ?, emoji = ? WHERE name = ?",
+      params: [nextName, nextEmoji, normalizedOld],
+    });
+  } else if (nextEmoji !== row[0].emoji) {
+    statements.push({
+      sql: "UPDATE categories SET emoji = ? WHERE name = ?",
+      params: [nextEmoji, normalizedOld],
+    });
+  }
+
+  if (statements.length > 0) await d1Batch(statements);
+
+  return {
+    categories: await listCategories(),
+    inventory: await listInventory(),
+    oldName: normalizedOld,
+    newName: nextName,
+  };
+}
+
 export async function reorderInventory(
   orderedIds: number[],
 ): Promise<InventoryItem[]> {

@@ -3,7 +3,7 @@
 import { CategoryAddPanel } from "@/components/rental/category-add-panel";
 import { useCategories } from "@/components/rental/category-context";
 import {
-  formatCategoryLabel,
+  formatCategoryDisplay,
   type NewCategoryInput,
 } from "@/lib/rental/categories";
 import { useEffect, useState } from "react";
@@ -57,7 +57,7 @@ export function CategorySelect({
         >
           {categories.map((c) => (
             <option key={c.name} value={c.name}>
-              {formatCategoryLabel(c.name)}
+              {formatCategoryDisplay(c)}
             </option>
           ))}
         </select>

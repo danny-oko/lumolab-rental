@@ -1,5 +1,4 @@
 import { rentalIdSchema } from "@/lib/api/schemas";
-import { logRentalDelete } from "@/lib/api/activity";
 import { parseValue } from "@/lib/api/validate";
 import { deleteRental } from "@/lib/db/repository";
 import { NextResponse } from "next/server";
@@ -18,7 +17,6 @@ export async function DELETE(_request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Rental not found" }, { status: 404 });
     }
 
-    await logRentalDelete(rental);
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("DELETE /api/rentals/[id]", err);

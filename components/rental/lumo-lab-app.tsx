@@ -67,6 +67,7 @@ export function LumoLabApp() {
               <InventoryPanel
                 inv={app.inv}
                 filteredInv={app.filteredInv}
+                categories={app.categories}
                 catFilter={app.catFilter}
                 avail={app.avail}
                 busy={app.busy}
@@ -81,6 +82,7 @@ export function LumoLabApp() {
                 onEditFlagMode={app.editFlagMode}
                 onAddItem={app.addItem}
                 onAddCategory={app.addCategory}
+                onUpdateCategory={app.updateCategory}
                 onReorderCategories={(cats) => void app.reorderCategories(cats)}
                 onReorderInventory={(items) => void app.reorderInventory(items)}
                 onDeleteItem={(id) => void app.deleteItem(id)}

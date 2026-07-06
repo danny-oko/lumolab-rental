@@ -813,6 +813,43 @@ export function useRentalApp() {
     [showError, sortInv],
   );
 
+  const updateCategory = useCallback(
+    async (oldName: string, patch: { name?: string; emoji?: string }) => {
+      try {
+        setBusy(true);
+        const result = await apiJson<{
+          categories: CategoryDef[];
+          inventory: InventoryItem[];
+          oldName: string;
+          newName: string;
+        }>(`/api/categories/${encodeURIComponent(oldName)}`, {
+          method: "PATCH",
+          body: JSON.stringify(patch),
+        });
+        setStoredCategories(result.categories);
+        const pending = pendingInventoryIds();
+        setInv(result.inventory.sort(sortInv));
+        setInvBaseline((prev) => {
+          const next = new Map(prev);
+          for (const item of result.inventory) {
+            if (!pending.has(item.id)) next.set(item.id, { ...item });
+          }
+          return next;
+        });
+        setCatFilter((current) =>
+          current === result.oldName ? result.newName : current,
+        );
+      } catch (err) {
+        void showError(err);
+        console.error(err);
+        throw err;
+      } finally {
+        setBusy(false);
+      }
+    },
+    [pendingInventoryIds, showError, sortInv],
+  );
+
   const totalSku = inv.length;
   const activeR = rentals.filter((r) => r.status === "out").length;
   const filteredRentals = useMemo(() => {
@@ -890,6 +927,7 @@ export function useRentalApp() {
     editFlagMode,
     addItem,
     addCategory,
+    updateCategory,
     categories,
     reorderCategories,
     reorderInventory,

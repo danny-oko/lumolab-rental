@@ -9,9 +9,11 @@ type ItemNameCellProps = {
 export function ItemNameCell({ item, variant }: ItemNameCellProps) {
   return (
     <span className="item-name">
-      <span className="item-name__icon">
-        <ItemEmoji icon={item.icon} size={26} />
-      </span>
+      {variant === "rental" && (
+        <span className="item-name__icon">
+          <ItemEmoji icon={item.icon} size={26} />
+        </span>
+      )}
       <span className="item-name__text">{item.name}</span>
       {variant === "inventory" && item.isStand && item.noFree && (
         <span className="badge">үнэгүй биш</span>

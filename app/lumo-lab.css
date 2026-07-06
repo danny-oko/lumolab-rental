@@ -795,6 +795,107 @@ body {
   padding-bottom: 1px;
 }
 
+.lumo-app .cat-manager {
+  margin: 0 0 12px;
+  padding: 12px;
+  background: color-mix(in srgb, var(--panel) 88%, var(--acc) 12%);
+  border: 1px solid color-mix(in srgb, var(--acc) 28%, var(--line));
+  border-radius: var(--radius-sm);
+}
+
+.lumo-app .cat-manager__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.lumo-app .cat-manager__head-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.lumo-app .cat-manager__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.lumo-app .cat-manager__row {
+  display: grid;
+  grid-template-columns: 20px 34px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.lumo-app .cat-manager__row--dirty {
+  border-color: color-mix(in srgb, var(--acc) 45%, var(--line));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--acc) 18%, transparent);
+}
+
+.lumo-app .cat-manager__row .drag-handle {
+  cursor: grab;
+  color: var(--mut);
+  font-size: 12px;
+  line-height: 1;
+  user-select: none;
+}
+
+.lumo-app .cat-manager__name {
+  width: 100%;
+  box-sizing: border-box;
+  height: 34px;
+  padding: 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  background: var(--input-bg);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--ink);
+  font-family: inherit;
+}
+
+.lumo-app .cat-manager__name:focus {
+  outline: none;
+  border-color: var(--acc);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--acc) 22%, transparent);
+}
+
+.lumo-app .cat-manager__count {
+  color: var(--mut);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.lumo-app .cat-manager__add.cat-add-panel {
+  box-shadow: none;
+  background: transparent;
+  border-style: dashed;
+}
+
+@media (max-width: 700px) {
+  .lumo-app .cat-manager__head {
+    flex-direction: column;
+  }
+
+  .lumo-app .cat-manager__row {
+    grid-template-columns: 16px 34px minmax(0, 1fr);
+  }
+
+  .lumo-app .cat-manager__count {
+    grid-column: 2 / -1;
+    padding-left: 44px;
+  }
+}
+
 @media (max-width: 900px) {
   .lumo-app .cat-add-panel__body {
     grid-template-columns: 1fr;
@@ -856,6 +957,8 @@ body {
   justify-content: center;
   line-height: 1;
   font-size: 20px;
+  width: 1em;
+  height: 1em;
 }
 
 .lumo-app .inv-add-form__field--icon .inv-icon-input {
@@ -1020,6 +1123,10 @@ body {
 
 .lumo-app .table-rent .col-type {
   width: 72px;
+}
+
+.lumo-app .table-rent td.col-type {
+  vertical-align: middle;
 }
 
 .lumo-app .table-rent .col-avail {
@@ -1296,17 +1403,32 @@ body {
 .lumo-app .item-name__icon {
   flex-shrink: 0;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+.lumo-app .cat-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
 }
 
 .lumo-app .cat-emoji {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  width: 1.15em;
   line-height: 1;
+  font-size: 1.05em;
 }
 
-.lumo-app .cat-pill__emoji {
-  margin-right: 4px;
+.lumo-app .cat-display__label {
+  min-width: 0;
+  line-height: 1.2;
 }
 
 .lumo-app .item-name__text {
@@ -1830,6 +1952,12 @@ body {
   gap: 6px;
   flex-wrap: wrap;
   margin: 8px 0 10px;
+}
+
+.lumo-app .pill-row .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .lumo-app .danger {

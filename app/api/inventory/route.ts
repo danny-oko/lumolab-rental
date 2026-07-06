@@ -1,11 +1,5 @@
 import { deleteInventorySchema, patchInventorySchema, createInventorySchema } from "@/lib/api/schemas";
 import { reorderInventorySchema } from "@/lib/api/category-schemas";
-import {
-  logInventoryCreate,
-  logInventoryDelete,
-  logInventoryFlags,
-  logInventoryUpdate,
-} from "@/lib/api/activity";
 import { parseJsonBody } from "@/lib/api/validate";
 import {
   createInventoryItem,
@@ -38,7 +32,6 @@ export async function POST(request: Request) {
 
   try {
     const created = await createInventoryItem(parsed.data);
-    await logInventoryCreate(created);
     return NextResponse.json(created, { status: 201 });
   } catch (err) {
     console.error("POST /api/inventory", err);
@@ -94,7 +87,6 @@ export async function PATCH(request: Request) {
       if (!updated) {
         return NextResponse.json({ error: "Item not found" }, { status: 404 });
       }
-      await logInventoryFlags(updated);
       return NextResponse.json(updated);
     }
 
@@ -104,7 +96,6 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "Invalid field or item" }, { status: 400 });
     }
 
-    await logInventoryUpdate(updated, field);
     return NextResponse.json(updated);
   } catch (err) {
     console.error("PATCH /api/inventory", err);
@@ -124,7 +115,6 @@ export async function DELETE(request: Request) {
     if (!deleted) {
       return NextResponse.json({ error: "Item not found" }, { status: 404 });
     }
-    await logInventoryDelete(deleted);
     return NextResponse.json({ ok: true, id: parsed.data.id });
   } catch (err) {
     if (err instanceof InventoryInUseError) {

@@ -1,5 +1,4 @@
 import { createRentalSchema, deleteAllRentalsSchema } from "@/lib/api/schemas";
-import { logRentalCheckout } from "@/lib/api/activity";
 import { parseJsonBody } from "@/lib/api/validate";
 import { createRental, deleteAllRentals, listRentals } from "@/lib/db/repository";
 import { NextResponse } from "next/server";
@@ -23,7 +22,6 @@ export async function POST(request: Request) {
 
   try {
     const created = await createRental(parsed.data);
-    await logRentalCheckout(created);
     return NextResponse.json(created, { status: 201 });
   } catch (err) {
     console.error("POST /api/rentals", err);

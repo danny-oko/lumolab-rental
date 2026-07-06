@@ -1,7 +1,27 @@
 import { useCategories } from "@/components/rental/category-context";
 import { useDragReorder } from "@/components/rental/use-drag-reorder";
-import { formatCategoryLabel, type CategoryDef } from "@/lib/rental/categories";
+import { type CategoryDef } from "@/lib/rental/categories";
 import type { Category, InventoryItem } from "@/lib/rental/types";
+
+export function CategoryDisplay({
+  cat,
+  suffix,
+}: {
+  cat: Pick<CategoryDef, "name" | "emoji">;
+  suffix?: string;
+}) {
+  return (
+    <span className="cat-display">
+      <span className="cat-emoji" aria-hidden>
+        {cat.emoji}
+      </span>
+      <span className="cat-display__label">
+        {cat.name}
+        {suffix}
+      </span>
+    </span>
+  );
+}
 
 type CategoryFilterProps = {
   catFilter: Category | "all";
@@ -61,8 +81,10 @@ export function CategoryFilter({
             {...dragProps}
           >
             {reorderable && <span className="drag-handle" aria-hidden>⋮⋮</span>}
-            {c.name}
-            {showCounts ? ` (${n})` : ""}
+            <CategoryDisplay
+              cat={c}
+              suffix={showCounts ? ` (${n})` : undefined}
+            />
           </button>
         );
       })}
@@ -71,5 +93,7 @@ export function CategoryFilter({
 }
 
 export function CategoryLabel({ name }: { name: string }) {
-  return <>{formatCategoryLabel(name)}</>;
+  const categories = useCategories();
+  const cat = categories.find((c) => c.name === name);
+  return cat ? <CategoryDisplay cat={cat} /> : <>{name}</>;
 }

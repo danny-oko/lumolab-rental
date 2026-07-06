@@ -100,6 +100,12 @@ export function formatCategoryLabel(name: string): string {
   return name;
 }
 
+export function formatCategoryDisplay(
+  cat: Pick<CategoryDef, "name" | "emoji">,
+): string {
+  return `${cat.emoji} ${cat.name}`;
+}
+
 export function categorySortIndex(
   name: string,
   categories: CategoryDef[] = DEFAULT_CATEGORIES,

@@ -1,5 +1,4 @@
 import { rentalIdSchema } from "@/lib/api/schemas";
-import { logRentalReturn } from "@/lib/api/activity";
 import { parseValue } from "@/lib/api/validate";
 import { returnRental } from "@/lib/db/repository";
 import { NextResponse } from "next/server";
@@ -19,7 +18,6 @@ export async function POST(_request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Rental not found" }, { status: 404 });
     }
 
-    await logRentalReturn(rental);
     return NextResponse.json(rental);
   } catch (err) {
     console.error("POST /api/rentals/[id]/return", err);

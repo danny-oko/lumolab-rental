@@ -4,6 +4,7 @@ import {
   CategoryFilter,
   CategoryLabel,
 } from "@/components/rental/category-filter";
+import { CategoryManager } from "@/components/rental/category-manager";
 import { CategorySelect } from "@/components/rental/category-select";
 import { InvIconInput } from "@/components/rental/inv-icon-input";
 import { InvFlagSelect } from "@/components/rental/inv-flag-select";
@@ -25,6 +26,7 @@ import { useState } from "react";
 type InventoryPanelProps = {
   inv: InventoryItem[];
   filteredInv: InventoryItem[];
+  categories: CategoryDef[];
   catFilter: Category | "all";
   avail: (id: number) => number;
   busy: boolean;
@@ -45,6 +47,10 @@ type InventoryPanelProps = {
     item: Omit<InventoryItem, "id" | "sortOrder">,
   ) => Promise<unknown>;
   onAddCategory: (def: NewCategoryInput) => void | Promise<void>;
+  onUpdateCategory: (
+    oldName: string,
+    patch: { name?: string; emoji?: string },
+  ) => Promise<void>;
   onDeleteItem: (id: number) => void;
   onReorderInventory?: (items: InventoryItem[]) => void | Promise<void>;
   onReorderCategories?: (categories: CategoryDef[]) => void | Promise<void>;
@@ -59,6 +65,7 @@ function flagLabel(mode: InvFlagMode) {
 export function InventoryPanel({
   inv,
   filteredInv,
+  categories,
   catFilter,
   avail,
   busy,
@@ -73,6 +80,7 @@ export function InventoryPanel({
   onEditFlagMode,
   onAddItem,
   onAddCategory,
+  onUpdateCategory,
   onDeleteItem,
   onReorderInventory,
   onReorderCategories,
@@ -80,6 +88,7 @@ export function InventoryPanel({
   itemOutQty,
 }: InventoryPanelProps) {
   const [showAdd, setShowAdd] = useState(false);
+  const [showCatManager, setShowCatManager] = useState(false);
   const saving = invSaveState === "saving";
   const canReorder =
     !invEditing && !busy && !!onReorderInventory && catFilter === "all";
@@ -134,8 +143,22 @@ export function InventoryPanel({
           )}
           <button
             type="button"
+            className="btn sm ghost"
+            onClick={() => {
+              setShowCatManager((v) => !v);
+              if (!showCatManager) setShowAdd(false);
+            }}
+            disabled={invEditing || busy}
+          >
+            {showCatManager ? "Хаах" : "Төрөл засах"}
+          </button>
+          <button
+            type="button"
             className="btn sm"
-            onClick={() => setShowAdd((v) => !v)}
+            onClick={() => {
+              setShowAdd((v) => !v);
+              if (!showAdd) setShowCatManager(false);
+            }}
             disabled={invEditing}
           >
             {showAdd ? "Хаах" : "+ Шинэ бараа"}
@@ -156,11 +179,24 @@ export function InventoryPanel({
         />
       )}
 
+      {showCatManager && (
+        <CategoryManager
+          categories={categories}
+          inv={inv}
+          busy={busy}
+          onUpdateCategory={onUpdateCategory}
+          onAddCategory={onAddCategory}
+          onReorder={(cats) => onReorderCategories?.(cats)}
+          onAlert={(message) => onAlert(message)}
+          onClose={() => setShowCatManager(false)}
+        />
+      )}
+
       <CategoryFilter
         catFilter={catFilter}
         inv={inv}
         showCounts
-        reorderable={!invEditing && !busy}
+        reorderable={!invEditing && !busy && !showCatManager}
         onFilterChange={onFilterChange}
         onReorder={onReorderCategories}
       />
